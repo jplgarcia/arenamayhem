@@ -1,0 +1,88 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+.connectButton {
+  /* background-image: linear-gradient(to right, #556270 0%, #FF6B6B  51%, #556270  100%); */
+ 
+ background: rgb(63,94,251);
+ background: linear-gradient(90deg, rgba(63,94,251,1) 0%, rgba(252,70,107,1) 100%);
+ 
+ 
+   margin: 10px;
+             padding: 15px 45px;
+             text-align: center;
+             text-transform: uppercase;
+             transition: 0.5s;
+             background-size: 200% auto;
+             color: white;            
+             box-shadow: 0 0 20px #eee;
+             border-radius: 10px;
+             display: block;
+   
+ }
+           .connectButton:hover {
+             background-position: right center; /* change the direction of the change here */
+             color: #fff;
+             text-decoration: none;
+           }
+ 
+ /* loading animation */
+ .spinner {
+   width: 40px;
+   height: 40px;
+   background-color: #333;
+ 
+   margin: 100px auto;
+   -webkit-animation: sk-rotateplane 1.2s infinite ease-in-out;
+   animation: sk-rotateplane 1.2s infinite ease-in-out;
+ }
+
+ .charAnimation {
+  height: 33px;
+  width: 1440px;
+  background: url("/Users/shaheenahmed/cartesi/arena-mayhem/am-frontend/assets/Dude_Monster_Death_8.png") no-repeat 0 0%; 
+  animation-name: sprite; 
+  
+  animation: sprite 3.5s steps(45) infinite;
+ }
+
+ @keyframes sprite {
+  from { background-position: 0 0%; }
+  to { background-position: 0 100%; }
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
