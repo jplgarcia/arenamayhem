@@ -64,10 +64,10 @@
    animation: sk-rotateplane 1.2s infinite ease-in-out;
  }
 
- .charAnimation {
+ /*.charAnimation {
   height: 33px;
   width: 1440px;
-  background: url("/Users/shaheenahmed/cartesi/arena-mayhem/am-frontend/assets/Dude_Monster_Death_8.png") no-repeat 0 0%; 
+  background: url("") no-repeat 0 0%; 
   animation-name: sprite; 
   
   animation: sprite 3.5s steps(45) infinite;
@@ -77,7 +77,7 @@
   from { background-position: 0 0%; }
   to { background-position: 0 100%; }
 }
-
+*/
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
