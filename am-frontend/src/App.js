@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
 import './App.css';
+import GenerateCharacter from'./GenerateCharacter.js'
+//import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
+//import { Switch } from 'react-router';
 
 function App() {
   const [currentAccount, setCurrentAccount] = useState("");
@@ -55,27 +58,16 @@ function App() {
   }, [])
 
   return (
-    <div className="App">
+  <div>
+    {currentAccount ? (
+      <GenerateCharacter />
+    ) : (
       <div>
-        <header className="App-header">
-        <h1>Arena Mayhem</h1>  
-        { !currentAccount && (
-        <button className="connectButton" onClick={connectWallet} >connect</button>)}
-
-        { currentAccount && (
-          <div>
-            <h1>Generate your Character</h1>
-            <button>Generate Character</button>
-            <button>Begin Battle</button>
-            <div className="charAnimation">
-
-            </div>
-          </div>
-
-        )}
-        </header>
+        <h1>Welcome to ArenaMayhem</h1>
+        <button onClick={connectWallet}>Connect Wallet</button>
       </div>
-    </div>
+    )}
+  </div>
   );
 }
 
