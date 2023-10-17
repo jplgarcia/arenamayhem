@@ -17,6 +17,7 @@ def calculate_damage(attacker, defender):
 
 def battle(player1, player2):
     log = []
+    rounds = []
     round_count = 1
 
     player1['HP'] = player1['HP'] * 5
@@ -36,6 +37,8 @@ def battle(player1, player2):
     while player1['HP'] > 0 and player2['HP'] > 0:
         log.append(f"Round {round_count}:")
         round_count += 1
+        round = []
+        rounds.append(round)
 
         # Calculate damage for the first attack
         damage = calculate_damage(attacker, defender)
@@ -43,6 +46,12 @@ def battle(player1, player2):
 
         log.append(f"{attacker['Name']} attacks {defender['Name']} with {attacker['Weapon']} for {damage} damage.")
         log.append(f"{defender['Name']}'s HP: {defender['HP']}")
+        round.append({
+            "striker" : attacker['Name'],
+            "target": defender['Name'],
+            "damage": damage,
+            "targetHP": defender['HP']
+        })
 
         # Check if the defender is knocked out
         if defender['HP'] <= 0:
@@ -53,6 +62,12 @@ def battle(player1, player2):
         attacker['HP'] -= damage
         log.append(f"{defender['Name']} Counter strikes {attacker['Name']} with {defender['Weapon']} for {damage} damage.")
         log.append(f"{attacker['Name']}'s HP: {attacker['HP']}")
+        round.append({
+            "striker" : defender['Name'],
+            "target": attacker['Name'],
+            "damage": damage,
+            "targetHP": attacker['HP']
+        })
 
         # Check if the defender is knocked out
         if attacker['HP'] <= 0:
@@ -65,7 +80,12 @@ def battle(player1, player2):
 
             log.append(f"{attacker['Name']} strikes again for {damage} damage.")
             log.append(f"{defender['Name']}'s HP: {defender['HP']}")
-
+            round.append({
+                "striker" : attacker['Name'],
+                "target": defender['Name'],
+                "damage": damage,
+                "targetHP": defender['HP']
+            })
             # Check if the defender is knocked out
             if defender['HP'] <= 0:
                 break
@@ -77,7 +97,12 @@ def battle(player1, player2):
 
             log.append(f"{defender['Name']} strikes again for {damage} damage.")
             log.append(f"{attacker['Name']}'s HP: {attacker['HP']}")
-
+            round.append({
+                "striker" : defender['Name'],
+                "target": attacker['Name'],
+                "damage": damage,
+                "targetHP": attacker['HP']
+            })
             # Check if the defender is knocked out
             if attacker['HP'] <= 0:
                 break
@@ -90,6 +115,7 @@ def battle(player1, player2):
         attacker = defender
         defender = temp
 
+
     # Determine the winner
     if player1['HP'] <= 0:
         log.append(f"{player2['Name']} wins!")
@@ -100,24 +126,26 @@ def battle(player1, player2):
     for entry in log:
         print(entry)
 
-# Example usage: tank x bruiser
-# player1 = {
-#     'Name': 'TANK',
-#     'ATK': 20,
-#     'SPD': 10,
-#     'DEF': 40,
-#     'HP': 30,
-#     'Weapon': 'Sword'
-# }
+    print (rounds)
 
-# player2 = {
-#     'Name': 'BRUISER',
-#     'ATK': 30,
-#     'SPD': 20,
-#     'DEF': 25,
-#     'HP': 25,
-#     'Weapon': 'Sword'
-# }
+# Example usage: tank x bruiser
+player1 = {
+    'Name': 'TANK',
+    'ATK': 20,
+    'SPD': 10,
+    'DEF': 40,
+    'HP': 30,
+    'Weapon': 'Sword'
+}
+
+player2 = {
+    'Name': 'BRUISER',
+    'ATK': 30,
+    'SPD': 20,
+    'DEF': 25,
+    'HP': 25,
+    'Weapon': 'Sword'
+}
 
 # # Example usage: tank x dps
 # player1 = {
@@ -158,22 +186,22 @@ def battle(player1, player2):
 # }
 
 # Example usage: tank x tank
-player1 = {
-    'Name': 'Player 1',
-    'ATK': 10,
-    'SPD': 10,
-    'DEF': 40,
-    'HP': 40,
-    'Weapon': 'Sword'
-}
+# player1 = {
+#     'Name': 'Player 1',
+#     'ATK': 10,
+#     'SPD': 10,
+#     'DEF': 40,
+#     'HP': 40,
+#     'Weapon': 'Sword'
+# }
 
-player2 = {
-    'Name': 'Player 2',
-    'ATK': 10,
-    'SPD': 10,
-    'DEF': 40,
-    'HP': 40,
-    'Weapon': 'Sword'
-}
+# player2 = {
+#     'Name': 'Player 2',
+#     'ATK': 10,
+#     'SPD': 10,
+#     'DEF': 40,
+#     'HP': 40,
+#     'Weapon': 'Sword'
+# }
 
 battle(player1, player2)
