@@ -15,13 +15,40 @@ def calculate_damage(attacker, defender):
     damage = max(damage, 0)  # Ensure non-negative damage
     return damage
 
+def stats_cheater_check(character):
+    if (character['HP'] + character['ATK'] + character['SPD'] + character['DEF'] > 100 ):
+        return -1
+    if (character['HP'] > 40 ):
+        return -1
+    if (character['ATK'] > 40 ):
+        return -1
+    if (character['SPD'] > 40 ):
+        return -1
+    if (character['DEF'] > 40 ):
+        return -1
+    
+    return 1
+    
+
+
 def battle(player1, player2):
+
+    if (stats_cheater_check(player1) == -1 or stats_cheater_check(player2) == -1):
+        print("CHEATER")
+        return
+
     log = []
     rounds = []
     round_count = 1
 
+    player1['Number'] = 1
+    player2['Number'] = 2
+
     player1['HP'] = player1['HP'] * 5
     player2['HP'] = player2['HP'] * 5
+
+    player1['TOTALHP'] = player1['HP']
+    player2['TOTALHP'] = player2['HP']
 
     player1['ATK'] = player1['ATK'] + 10
     player2['ATK'] = player2['ATK'] + 10
@@ -47,10 +74,11 @@ def battle(player1, player2):
         log.append(f"{attacker['Name']} attacks {defender['Name']} with {attacker['Weapon']} for {damage} damage.")
         log.append(f"{defender['Name']}'s HP: {defender['HP']}")
         round.append({
+            "striker_number": attacker['Number'],
             "striker" : attacker['Name'],
             "target": defender['Name'],
             "damage": damage,
-            "targetHP": defender['HP']
+            "targetHP": defender['HP'] * 100 / defender['TOTALHP']
         })
 
         # Check if the defender is knocked out
@@ -63,10 +91,11 @@ def battle(player1, player2):
         log.append(f"{defender['Name']} Counter strikes {attacker['Name']} with {defender['Weapon']} for {damage} damage.")
         log.append(f"{attacker['Name']}'s HP: {attacker['HP']}")
         round.append({
+            "striker_number": defender['Number'],
             "striker" : defender['Name'],
             "target": attacker['Name'],
             "damage": damage,
-            "targetHP": attacker['HP']
+            "targetHP": attacker['HP'] * 100 / attacker['TOTALHP']
         })
 
         # Check if the defender is knocked out
@@ -81,10 +110,11 @@ def battle(player1, player2):
             log.append(f"{attacker['Name']} strikes again for {damage} damage.")
             log.append(f"{defender['Name']}'s HP: {defender['HP']}")
             round.append({
+                "striker_number": attacker['Number'],
                 "striker" : attacker['Name'],
                 "target": defender['Name'],
                 "damage": damage,
-                "targetHP": defender['HP']
+                "targetHP": defender['HP'] * 100 / defender['TOTALHP']
             })
             # Check if the defender is knocked out
             if defender['HP'] <= 0:
@@ -98,10 +128,11 @@ def battle(player1, player2):
             log.append(f"{defender['Name']} strikes again for {damage} damage.")
             log.append(f"{attacker['Name']}'s HP: {attacker['HP']}")
             round.append({
+                "striker_number": defender['Number'],
                 "striker" : defender['Name'],
                 "target": attacker['Name'],
                 "damage": damage,
-                "targetHP": attacker['HP']
+                "targetHP": attacker['HP'] * 100 / attacker['TOTALHP']
             })
             # Check if the defender is knocked out
             if attacker['HP'] <= 0:
@@ -144,7 +175,7 @@ player2 = {
     'SPD': 20,
     'DEF': 25,
     'HP': 25,
-    'Weapon': 'Sword'
+    'Weapon': 'Lance'
 }
 
 # # Example usage: tank x dps
@@ -188,8 +219,8 @@ player2 = {
 # Example usage: tank x tank
 # player1 = {
 #     'Name': 'Player 1',
-#     'ATK': 10,
-#     'SPD': 10,
+#     'ATK': 00,
+#     'SPD': 20,
 #     'DEF': 40,
 #     'HP': 40,
 #     'Weapon': 'Sword'
@@ -197,8 +228,8 @@ player2 = {
 
 # player2 = {
 #     'Name': 'Player 2',
-#     'ATK': 10,
-#     'SPD': 10,
+#     'ATK': 0,
+#     'SPD': 20,
 #     'DEF': 40,
 #     'HP': 40,
 #     'Weapon': 'Sword'
