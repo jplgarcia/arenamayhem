@@ -1,11 +1,16 @@
 import React, { useEffect, useState } from "react";
 import './App.css';
 import GenerateCharacter from'./GenerateCharacter.js'
+import StakeTokens from "./StakeTokens";
+import Battle from './Battle';
 //import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 //import { Switch } from 'react-router';
 
 function App() {
   const [currentAccount, setCurrentAccount] = useState("");
+  const [characterGenerated, setCharacterGenerated] = useState(false);
+  const [amountStaked, setAmountStaked] = useState(false);
+  const dappAddress = "0x70ac08179605AF2D9e75782b8DEcDD3c22aA4D0C"; //edit as per network
 
   const checkIfWalletIsConnected = async () => {
     /** First make sure we have access to window.ethereum */
@@ -57,10 +62,45 @@ function App() {
     checkIfWalletIsConnected();
   }, [])
 
+// Callback function to update characterGenerated
+const handleCharacterGenerated = () => {
+  setCharacterGenerated(true);
+};
+
+const handleBettingSubmit = () => {
+  setAmountStaked(true);
+};
+
+
   return (
-  <div>
+    <div className="App-header">
     {currentAccount ? (
-      <GenerateCharacter />
+      characterGenerated ? (
+        amountStaked ? (
+          <Battle />
+        ) : (
+        <StakeTokens dappAddress={dappAddress} onSubmit={handleBettingSubmit}/>
+        ) 
+      ) : (
+        <GenerateCharacter currentAccount={currentAccount} dappAddress={dappAddress} onCharacterGenerated={handleCharacterGenerated} />
+      )
+    ) : (
+      <div>
+        <h1>Welcome to ArenaMayhem</h1>
+        <button onClick={connectWallet}>Connect Wallet</button>
+      </div>
+    )}
+  </div>
+  ); 
+  /*
+  return (
+    <div>
+    {currentAccount ? (
+      characterGenerated ? (
+        <StakeTokens dappAddress={dappAddress}/>
+      ) : (
+        <GenerateCharacter currentAccount={currentAccount} dappAddress={dappAddress} onCharacterGenerated={handleCharacterGenerated} />
+      )
     ) : (
       <div>
         <h1>Welcome to ArenaMayhem</h1>
@@ -69,6 +109,7 @@ function App() {
     )}
   </div>
   );
+*/
 }
 
 export default App;
