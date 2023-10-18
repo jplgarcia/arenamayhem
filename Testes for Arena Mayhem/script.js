@@ -1,98 +1,115 @@
-async function sleep(ms) {
-    return setTimeout(resolve, ms);
-}
+//Preload images to avoid flashing
+let images = [];
+function preload() {
+    let weapons = ["sword", "axe", "lance"]
+    let animations = [
+        "ATTACK",
+        "RUN",
+        "IDLE",
+        "WALK",
+        "HURT",
+        "DIE",
+        "JUMP"
+    ]
 
-player1 = document.getElementById("player1")
-player1.classList.add(players[0].Weapon)
-player2 = document.getElementById("player2")
-player2.classList.add(players[1].Weapon)
+    for (const animation of animations) {
+        for (const weapon of weapons) {
+            for (let index = 0; index < 10; index++) {
+                let image = new Image()
+                image.src = "img/" + weapon + "/" + animation +"_00" + index + ".png"
+                images.push(image)
+            }
+        }
+    }
+}
+preload()
+
+//
+// player1 = document.getElementById("player1")
+// player1.classList.add(players[0].Weapon)
+// player2 = document.getElementById("player2")
+// player2.classList.add(players[1].Weapon)
+
 
 // param player = 1 or 2
 // param weapon = weapon name
-async function advance(player, weapon) {
-    let img
+
+/*******************
+*
+*   SESSION: animations
+*
+********************/
+
+
+/**
+ * animate the bar changing with the % of new current HP
+ * @param {*} player int player 0 = 1, 1 = 2
+ * @param {*} hp int new HP in %. 0 - 100
+ */
+function setPlayerHP(player, hp) {
+    let bar
     if (player == 0) {
-        img = document.getElementById("player1")
+        bar = document.getElementById("hp1-bar")
     } else {
-        img = document.getElementById("player2")
+        bar = document.getElementById("hp2-bar")
     }
-    console.log(img)
-    img.style.animationName = weapon.toLowerCase() + "-run"
-    img.classList.add("advanced")
+    if (hp < 0)
+    hp = 0
+    bar.style.width = (200 * (hp/100)) + "px"
 }
 
-async function retreat(player, weapon) {
+/**
+ * auxiliar to get player element
+ * @param {*} player  int player 0 = 1, 1 = 2
+ * @returns element in the page corresponding to that player character
+ */
+function getPlayerImgObject(player) {
     let img
     if (player == 0) {
         img = document.getElementById("player1")
     } else {
         img = document.getElementById("player2")
     }
-    img.style.animationName = weapon.toLowerCase() + "-walk"
-    img.classList.remove("advanced")
+    return img
 }
 
-async function idle(player, weapon) {
-    let img
-    if (player == 0) {
-        img = document.getElementById("player1")
-    } else {
-        img = document.getElementById("player2")
+
+/**
+ * triggers animation
+ * @param {*} animation string type of animation: advance, retreat, attack, hurt, jump, die, dead, idle
+ * @param {*} player int player 0 = 1, 1 = 2
+ * @param {*} weapon string sword, lance, axe
+ */
+async function animate(animation, player, weapon) {
+    let animationName = animation
+    if (animation == "advance"){
+        animationName = "run"
+    } else if (animation == "retreat"){
+        animationName = "walk"
     }
-    img.style.animationName = weapon.toLowerCase() + "-idle"
+    let img = getPlayerImgObject(player)
+    img.style.animationName = weapon.toLowerCase() + "-" + animationName
+    if (animation == "advance") {
+        img.classList.add("advanced")
+    } else if (animation == "retreat") {
+        img.classList.remove("advanced")
+    }
 }
 
-async function attack(player, weapon) {
-    let img
-    if (player == 0) {
-        img = document.getElementById("player1")
-    } else {
-        img = document.getElementById("player2")
-    }
-    img.style.animationName = weapon.toLowerCase() + "-attack"
-}
 
-async function hurt(player, weapon) {
-    let img
-    if (player == 0) {
-        img = document.getElementById("player1")
-    } else {
-        img = document.getElementById("player2")
-    }
-    img.style.animationName = weapon.toLowerCase() + "-hurt"
-}
-
-async function die(player, weapon) {
-    let img
-    if (player == 0) {
-        img = document.getElementById("player1")
-    } else {
-        img = document.getElementById("player2")
-    }
-    img.style.animationName = weapon.toLowerCase() + "-die"
-}
-
-async function dead(player, weapon) {
-    let img
-    if (player == 0) {
-        img = document.getElementById("player1")
-    } else {
-        img = document.getElementById("player2")
-    }
-    img.style.animationName = weapon.toLowerCase() + "-dead"
-}
-
-async function jump(player, weapon) {
-    let img
-    if (player == 0) {
-        img = document.getElementById("player1")
-    } else {
-        img = document.getElementById("player2")
-    }
-    img.style.animationName = weapon.toLowerCase() + "-jump"
-}
+/*******************
+*
+*   SESSION: fight funciton
+*
+********************/
 
 async function fight(input, players) {
+    setPlayerHP(0, 100)
+    setPlayerHP(1, 100)
+    animate("retreat", 0, players[0].Weapon)
+    animate("retreat", 1, players[1].Weapon)
+    animate("idle", 0, players[0].Weapon)
+    animate("idle", 1, players[1].Weapon)
 
     await new Promise(r => setTimeout(r, 1000))
     await new Promise(r => setTimeout(r, 1000))
@@ -101,21 +118,22 @@ async function fight(input, players) {
     let iterations = input.length;
 
     for (let round of input) {
-        const advancer = round[0].striker_number -1
+        const advancer = round[0].striker_number
         
-        advance(advancer, players[advancer].Weapon)
+        animate("advance", advancer, players[advancer].Weapon)
         await new Promise(r => setTimeout(r, 1000))
 
         for (turn of round) {
-            const striker = turn.striker_number - 1
+            const striker = turn.striker_number
             const other = striker == 0 ? 1 : 0
 
-            attack(striker, players[striker].Weapon)
-            hurt(other, players[other].Weapon)
+            animate("attack", striker, players[striker].Weapon)
+            animate("hurt", other, players[other].Weapon)
+            setPlayerHP(other, turn.targetHP)
             await new Promise(r => setTimeout(r, 1000))
 
-            idle(striker, players[striker].Weapon)
-            idle(other, players[other].Weapon)
+            animate("idle", striker, players[striker].Weapon)
+            animate("idle", other, players[other].Weapon)
             
         }
 
@@ -123,20 +141,19 @@ async function fight(input, players) {
             // last round
             //gotta check who was the last to strike to see the winner
             const lastTurn = round.length - 1
-            const winner = round[lastTurn].striker_number - 1
+            const winner = round[lastTurn].striker_number
             const loser = winner == 0 ? 1 : 0
-            jump(winner, players[winner].Weapon)
-            die(loser, players[loser].Weapon)
+            animate("jump", winner, players[winner].Weapon)
+            animate("die", loser, players[loser].Weapon)
             await new Promise(r => setTimeout(r, 1000))
-            jump(winner, players[winner].Weapon)
-            dead(loser, players[loser].Weapon)
-            await new Promise(r => setTimeout(r, 1000))
-            idle(winner, players[winner].Weapon)
+            animate("dead", loser, players[loser].Weapon)
+            await new Promise(r => setTimeout(r, 3000))
+            animate("idle", winner, players[winner].Weapon)
         }
         else {
-            retreat(advancer, players[advancer].Weapon)
+            animate("retreat", advancer, players[advancer].Weapon)
             await new Promise(r => setTimeout(r, 1000))
-            idle(advancer, players[advancer].Weapon)
+            animate("idle", advancer, players[advancer].Weapon)
         }
 
     }

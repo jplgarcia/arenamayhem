@@ -4,11 +4,11 @@ import math
 def calculate_damage(attacker, defender):
     # Determine weapon triangle advantage
     advantage_multiplier = 1.0
-    if attacker['Weapon'] == 'Sword' and defender['Weapon'] == 'Axe':
+    if attacker['Weapon'] == 'sword' and defender['Weapon'] == 'axe':
         advantage_multiplier = 1.2
-    elif attacker['Weapon'] == 'Axe' and defender['Weapon'] == 'Lance':
+    elif attacker['Weapon'] == 'axe' and defender['Weapon'] == 'lance':
         advantage_multiplier = 1.2
-    elif attacker['Weapon'] == 'Lance' and defender['Weapon'] == 'Sword':
+    elif attacker['Weapon'] == 'lance' and defender['Weapon'] == 'sword':
         advantage_multiplier = 1.2
 
     damage = int(attacker['ATK'] * advantage_multiplier - defender['DEF'])
@@ -41,8 +41,8 @@ def battle(player1, player2):
     rounds = []
     round_count = 1
 
-    player1['Number'] = 1
-    player2['Number'] = 2
+    player1['Number'] = 0
+    player2['Number'] = 1
 
     player1['HP'] = player1['HP'] * 5
     player2['HP'] = player2['HP'] * 5
@@ -166,7 +166,7 @@ player1 = {
     'SPD': 10,
     'DEF': 40,
     'HP': 30,
-    'Weapon': 'Sword'
+    'Weapon': 'sword'
 }
 
 player2 = {
@@ -175,27 +175,27 @@ player2 = {
     'SPD': 20,
     'DEF': 25,
     'HP': 25,
-    'Weapon': 'Lance'
+    'Weapon': 'lance'
 }
 
 # # Example usage: tank x dps
-# player1 = {
-#     'Name': 'TANK',
-#     'ATK': 20,
-#     'SPD': 10,
-#     'DEF': 40,
-#     'HP': 30,
-#     'Weapon': 'Sword'
-# }
+player1 = {
+    'Name': 'TANK',
+    'ATK': 20,
+    'SPD': 10,
+    'DEF': 40,
+    'HP': 30,
+    'Weapon': 'lance'
+}
 
-# player2 = {
-#     'Name': 'DPS',
-#     'ATK': 40,
-#     'SPD': 30,
-#     'DEF': 10,
-#     'HP': 20,
-#     'Weapon': 'Sword'
-# }
+player2 = {
+    'Name': 'DPS',
+    'ATK': 40,
+    'SPD': 30,
+    'DEF': 10,
+    'HP': 20,
+    'Weapon': 'axe'
+}
 
 # Example usage: bruiser x dps
 # player1 = {
@@ -204,7 +204,7 @@ player2 = {
 #     'SPD': 20,
 #     'DEF': 25,
 #     'HP': 25,
-#     'Weapon': 'Sword'
+#     'Weapon': 'sword'
 # }
 
 # player2 = {
@@ -213,7 +213,7 @@ player2 = {
 #     'SPD': 30,
 #     'DEF': 10,
 #     'HP': 20,
-#     'Weapon': 'Sword'
+#     'Weapon': 'sword'
 # }
 
 # Example usage: tank x tank
@@ -223,7 +223,7 @@ player2 = {
 #     'SPD': 20,
 #     'DEF': 40,
 #     'HP': 40,
-#     'Weapon': 'Sword'
+#     'Weapon': 'sword'
 # }
 
 # player2 = {
@@ -232,7 +232,7 @@ player2 = {
 #     'SPD': 20,
 #     'DEF': 40,
 #     'HP': 40,
-#     'Weapon': 'Sword'
+#     'Weapon': 'sword'
 # }
 
 battle(player1, player2)

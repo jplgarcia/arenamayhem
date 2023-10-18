@@ -1,15 +1,37 @@
-#animation-container {
-    width: 800px;
-    height: 800px;
-    position: relative;
-    overflow: hidden;
-}
 
 .arena {
     width: 625px;
     height: 300px;
-    background-color: red;
+    background-color: #e0e0e0;
     position: relative;
+    
+}
+
+.hp-box {
+    margin-top: 5px;
+    position: absolute;
+    display: inline-block;
+    width: 204px;
+    height: 14px;
+    border: 1px solid black;
+}
+
+.hp-bar {
+    position: absolute;
+    display: inline-block;
+    width: 200px;
+    height: 10px;
+    margin: 2px;
+    background-color: #52c349;
+    transition: all 0.5s ease;
+}
+
+#hp1-box {
+    left: 72px;
+}
+
+#hp2-box {
+    left: 348px;
 }
 
 .fighter {
@@ -28,15 +50,15 @@
     left: 0;
 }
 
-.Sword {
+.sword {
     background-image: url("img/sword/IDLE_000.png");
     animation-name: sword-idle;
 }
-.Axe {
+.axe {
     background-image: url("img/axe/IDLE_000.png");
     animation-name: axe-idle;
 }
-.Lance {
+.lance {
     background-image: url("img/lance/IDLE_000.png");
     animation-name: lance-idle;
 }
@@ -151,8 +173,17 @@
     /* Fill in values for other percentages and images for DIE */
 }
 
-@keyframes sword-die {
+@keyframes sword-dead {
     0% {background-image: url("img/sword/DIE_009.png");}
+    10% {background-image: url("img/sword/DIE_009.png");}
+    20% {background-image: url("img/sword/DIE_009.png");}
+    30% {background-image: url("img/sword/DIE_009.png");}
+    40% {background-image: url("img/sword/DIE_009.png");}
+    50% {background-image: url("img/sword/DIE_009.png");}
+    60% {background-image: url("img/sword/DIE_009.png");}
+    70% {background-image: url("img/sword/DIE_009.png");}
+    80% {background-image: url("img/sword/DIE_009.png");}
+    90% {background-image: url("img/sword/DIE_009.png");}
     100% {background-image: url("img/sword/DIE_009.png");}
     /* Fill in values for other percentages and images for DIE */
 }

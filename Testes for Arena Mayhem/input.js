@@ -5,16 +5,16 @@ let players = [
         'SPD': 10,
         'DEF': 40,
         'HP': 30,
-        'Weapon': 'Sword'
+        'Weapon': 'lance'
     },
     {
-        'Name': 'BRUISER',
-        'ATK': 30,
-        'SPD': 20,
-        'DEF': 25,
-        'HP': 25,
-        'Weapon': 'Lance'
+        'Name': 'DPS',
+        'ATK': 40,
+        'SPD': 30,
+        'DEF': 10,
+        'HP': 20,
+        'Weapon': 'axe'
     }
 ]
 
-let input = [[{'striker_number': 2, 'striker': 'BRUISER', 'target': 'TANK', 'damage': 8, 'targetHP': 94.66666666666667}, {'striker_number': 1, 'striker': 'TANK', 'target': 'BRUISER', 'damage': 5, 'targetHP': 96.0}, {'striker_number': 2, 'striker': 'BRUISER', 'target': 'TANK', 'damage': 8, 'targetHP': 89.33333333333333}], [{'striker_number': 1, 'striker': 'TANK', 'target': 'BRUISER', 'damage': 7, 'targetHP': 90.4}, {'striker_number': 2, 'striker': 'BRUISER', 'target': 'TANK', 'damage': 11, 'targetHP': 82.0}, {'striker_number': 2, 'striker': 'BRUISER', 'target': 'TANK', 'damage': 11, 'targetHP': 74.66666666666667}], [{'striker_number': 2, 'striker': 'BRUISER', 'target': 'TANK', 'damage': 15, 'targetHP': 64.66666666666667}, {'striker_number': 1, 'striker': 'TANK', 'target': 'BRUISER', 'damage': 11, 'targetHP': 81.6}, {'striker_number': 2, 'striker': 'BRUISER', 'target': 'TANK', 'damage': 15, 'targetHP': 54.666666666666664}], [{'striker_number': 1, 'striker': 'TANK', 'target': 'BRUISER', 'damage': 15, 'targetHP': 69.6}, {'striker_number': 2, 'striker': 'BRUISER', 'target': 'TANK', 'damage': 20, 'targetHP': 41.333333333333336}, {'striker_number': 2, 'striker': 'BRUISER', 'target': 'TANK', 'damage': 20, 'targetHP': 28.0}], [{'striker_number': 2, 'striker': 'BRUISER', 'target': 'TANK', 'damage': 25, 'targetHP': 11.333333333333334}, {'striker_number': 1, 'striker': 'TANK', 'target': 'BRUISER', 'damage': 19, 'targetHP': 54.4}, {'striker_number': 2, 'striker': 'BRUISER', 'target': 'TANK', 'damage': 25, 'targetHP': -5.333333333333333}]]
+let input = [[{'striker_number': 1, 'striker': 'DPS', 'target': 'TANK', 'damage': 20, 'targetHP': 86.66666666666667}, {'striker_number': 0, 'striker': 'TANK', 'target': 'DPS', 'damage': 20, 'targetHP': 80.0}, {'striker_number': 1, 'striker': 'DPS', 'target': 'TANK', 'damage': 20, 'targetHP': 73.33333333333333}], [{'striker_number': 0, 'striker': 'TANK', 'target': 'DPS', 'damage': 22, 'targetHP': 58.0}, {'striker_number': 1, 'striker': 'DPS', 'target': 'TANK', 'damage': 23, 'targetHP': 58.0}, {'striker_number': 1, 'striker': 'DPS', 'target': 'TANK', 'damage': 23, 'targetHP': 42.666666666666664}], [{'striker_number': 1, 'striker': 'DPS', 'target': 'TANK', 'damage': 27, 'targetHP': 24.666666666666668}, {'striker_number': 0, 'striker': 'TANK', 'target': 'DPS', 'damage': 26, 'targetHP': 32.0}, {'striker_number': 1, 'striker': 'DPS', 'target': 'TANK', 'damage': 27, 'targetHP': 6.666666666666667}], [{'striker_number': 0, 'striker': 'TANK', 'target': 'DPS', 'damage': 30, 'targetHP': 2.0}, {'striker_number': 1, 'striker': 'DPS', 'target': 'TANK', 'damage': 32, 'targetHP': -14.666666666666666}]]
