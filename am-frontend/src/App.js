@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import './App.css';
 import GenerateCharacter from'./GenerateCharacter.js'
 import StakeTokens from "./StakeTokens";
+import Battle from './Battle';
 //import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 //import { Switch } from 'react-router';
 
 function App() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [characterGenerated, setCharacterGenerated] = useState(false);
+  const [amountStaked, setAmountStaked] = useState(false);
   const dappAddress = "0x70ac08179605AF2D9e75782b8DEcDD3c22aA4D0C"; //edit as per network
 
   const checkIfWalletIsConnected = async () => {
@@ -65,6 +67,32 @@ const handleCharacterGenerated = () => {
   setCharacterGenerated(true);
 };
 
+const handleBettingSubmit = () => {
+  setAmountStaked(true);
+};
+
+
+  return (
+    <div className="App-header">
+    {currentAccount ? (
+      characterGenerated ? (
+        amountStaked ? (
+          <Battle />
+        ) : (
+        <StakeTokens dappAddress={dappAddress} onSubmit={handleBettingSubmit}/>
+        ) 
+      ) : (
+        <GenerateCharacter currentAccount={currentAccount} dappAddress={dappAddress} onCharacterGenerated={handleCharacterGenerated} />
+      )
+    ) : (
+      <div>
+        <h1>Welcome to ArenaMayhem</h1>
+        <button onClick={connectWallet}>Connect Wallet</button>
+      </div>
+    )}
+  </div>
+  ); 
+  /*
   return (
     <div>
     {currentAccount ? (
@@ -81,6 +109,7 @@ const handleCharacterGenerated = () => {
     )}
   </div>
   );
+*/
 }
 
 export default App;

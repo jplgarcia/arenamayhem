@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { JsonRpcProvider } from "@ethersproject/providers";
 import { ethers } from 'ethers';
 import { InputBox__factory } from "@cartesi/rollups";
 
 function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }) {
 
-  const HARDHAT_DEFAULT_MNEMONIC = "test test test test test test test test test test test junk";
-  const HARDHAT_LOCALHOST_RPC_URL = "http://localhost:8545";
+  //const HARDHAT_DEFAULT_MNEMONIC = "test test test test test test test test test test test junk";
+  //const HARDHAT_LOCALHOST_RPC_URL = "http://localhost:8545";
   const INPUTBOX_ADDRESS = "0x59b22D57D4f067708AB0c00552767405926dc768";
   const [formData, setFormData] = useState({
     attack: 0,
@@ -51,7 +50,6 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
   };
 
   const addInputOnchain = async (str)  => {
-    
         // Start a connection
         //const provider = new JsonRpcProvider(HARDHAT_LOCALHOST_RPC_URL);
         /* const signer = ethers.HDNodeWallet.fromMnemonic(
@@ -72,10 +70,10 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
             ? str
             : ethers.toUtf8Bytes(str); */
         const payload = ethers.toUtf8Bytes(str);
-
+        console.log("payload is : ", payload)
         // Send the transaction
         const tx = await inputBox.addInput(dappAddress, payload);
-        console.log(`transaction: ${tx.hash}`);
+        console.log(`transaction: ${tx.hash}`)
 
         // Wait for confirmation
         console.log("waiting for confirmation...")
