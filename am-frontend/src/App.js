@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import './App.css';
 import GenerateCharacter from'./GenerateCharacter.js'
+import StakeTokens from "./StakeTokens";
 //import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
 //import { Switch } from 'react-router';
 
 function App() {
   const [currentAccount, setCurrentAccount] = useState("");
+  const [characterGenerated, setCharacterGenerated] = useState(false);
 
   const checkIfWalletIsConnected = async () => {
     /** First make sure we have access to window.ethereum */
@@ -57,10 +59,19 @@ function App() {
     checkIfWalletIsConnected();
   }, [])
 
+// Callback function to update characterGenerated
+const handleCharacterGenerated = () => {
+  setCharacterGenerated(true);
+};
+
   return (
-  <div>
+    <div>
     {currentAccount ? (
-      <GenerateCharacter />
+      characterGenerated ? (
+        <StakeTokens />
+      ) : (
+        <GenerateCharacter onCharacterGenerated={handleCharacterGenerated} />
+      )
     ) : (
       <div>
         <h1>Welcome to ArenaMayhem</h1>
