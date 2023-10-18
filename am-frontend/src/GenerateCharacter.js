@@ -1,6 +1,13 @@
 import React, { useState } from 'react';
+import { JsonRpcProvider } from "@ethersproject/providers";
+import { ethers } from 'ethers';
+import { InputBox__factory } from "@cartesi/rollups";
 
-function GenerateCharacter({ onCharacterGenerated }) {
+function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }) {
+
+  const HARDHAT_DEFAULT_MNEMONIC = "test test test test test test test test test test test junk";
+  const HARDHAT_LOCALHOST_RPC_URL = "http://localhost:8545";
+  const INPUTBOX_ADDRESS = "0x59b22D57D4f067708AB0c00552767405926dc768";
   const [formData, setFormData] = useState({
     attack: 0,
     defense: 0,
@@ -37,26 +44,46 @@ function GenerateCharacter({ onCharacterGenerated }) {
     } else {
       onCharacterGenerated(); //fallback function to render staking component
       const jsonData = JSON.stringify(formData);
-      // TODO - submit jsondata on-chain
       console.log('Form submitted successfully.', jsonData);
       console.log('Selected weapon:', formData.weapon);
+      addInputOnchain(jsonData)
     }
   };
-/*
-  const addInputOnchain = async  => {
+
+  const addInputOnchain = async (str)  => {
     
-        try {
-            let payload = ethers.utils.toUtf8Bytes(str);
-            if (hexInput) {
-                payload = ethers.utils.arrayify(str);
-            }
-            rollups.inputContract.addInput(rollups.dappContract.address, payload);
-        } catch (e) {
-            console.log(`${e}`);
-        } 
-}; */
+        // Start a connection
+        //const provider = new JsonRpcProvider(HARDHAT_LOCALHOST_RPC_URL);
+        /* const signer = ethers.HDNodeWallet.fromMnemonic(
+            HARDHAT_DEFAULT_MNEMONIC,
+            `m/44'/60'/0'/0/0`
+        ).connect(provider); */
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();  
+
+        // Instantiate the InputBox contract
+        const inputBox = InputBox__factory.connect(
+            INPUTBOX_ADDRESS,
+            signer
+        );
+
+        // Encode the input
+        /* const payload = ethers.isBytesLike(str)
+            ? str
+            : ethers.toUtf8Bytes(str); */
+        const payload = ethers.toUtf8Bytes(str);
+
+        // Send the transaction
+        const tx = await inputBox.addInput(dappAddress, payload);
+        console.log(`transaction: ${tx.hash}`);
+
+        // Wait for confirmation
+        console.log("waiting for confirmation...")
+        const receipt = await tx.wait(1)
+        console.log("receipt generated...", receipt)
+  };
   
-  ; 
+; 
 
 
   return (
@@ -85,7 +112,7 @@ function GenerateCharacter({ onCharacterGenerated }) {
           <label htmlFor="weapon">Select Weapon:</label>
           <select id="weapon" name="weapon" onChange={handleWeaponChange}>
             <option value="sword">Sword</option>
-            <option value="spear">Dagger</option>
+            <option value="spear">Spear</option>
             <option value="axe">Axe</option>
           </select>
         </div>

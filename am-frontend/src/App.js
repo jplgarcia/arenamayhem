@@ -8,6 +8,7 @@ import StakeTokens from "./StakeTokens";
 function App() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [characterGenerated, setCharacterGenerated] = useState(false);
+  const dappAddress = "0x70ac08179605AF2D9e75782b8DEcDD3c22aA4D0C"; //edit as per network
 
   const checkIfWalletIsConnected = async () => {
     /** First make sure we have access to window.ethereum */
@@ -68,9 +69,9 @@ const handleCharacterGenerated = () => {
     <div>
     {currentAccount ? (
       characterGenerated ? (
-        <StakeTokens />
+        <StakeTokens dappAddress={dappAddress}/>
       ) : (
-        <GenerateCharacter onCharacterGenerated={handleCharacterGenerated} />
+        <GenerateCharacter currentAccount={currentAccount} dappAddress={dappAddress} onCharacterGenerated={handleCharacterGenerated} />
       )
     ) : (
       <div>
