@@ -1,0 +1,38 @@
+.weapon-image {
+    border: 2px solid transparent;
+    border-radius: 10px;
+    transition: border-color 0.3s ease;
+    width: 150px; /* Adjust the width to your desired thumbnail size */
+    height: auto; /* Maintain aspect ratio */
+  }
+
+/* Style for the selected image */
+.selected {
+    border-color: #007bff; /* You can change this color to your preference */
+  }
+  
+/* Hover effect for all images */
+.weapon-image:hover {
+    border-color: #007bff; /* Change this color to your preference for the hover effect */
+    cursor: pointer; /* Change the cursor to a pointer on hover */
+}
+
+.generateButton {
+    /* background-image: linear-gradient(to right, #556270 0%, #FF6B6B  51%, #556270  100%); */
+   
+   background: rgb(157, 12, 12);
+   /*background: linear-gradient(90deg, rgba(63,94,251,1) 0%, rgba(252,70,107,1) 100%); */
+   margin: 10px;
+   padding: 15px 40px;
+   border-radius: 10px;
+   font-weight: 800;
+}
+
+.formContainer{
+    display: flex;
+  flex-direction: column;
+  gap: 10px;
+  column-gap: 30px;
+}
+  
+

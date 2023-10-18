@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ethers } from 'ethers';
 import { InputBox__factory } from "@cartesi/rollups";
+import './GenerateCharacter.css';
 
 function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }) {
 
@@ -27,8 +28,8 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
     }
   };
 
-  const handleWeaponChange = (e) => {
-    const weapon = e.target.value;
+  const handleWeaponSelection = (e) => {
+    const weapon = e;
     setFormData({
       ...formData,
       weapon,
@@ -86,10 +87,11 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
 
   return (
     <div>
-      <h1>Generate your player</h1>
+      <h1>⚔️Generate your player</h1>
       <div>
-    <p>Allocate a total of 100 points among the following attributes (maximum 40 points per attribute).</p>
+    <p><i>Allocate a total of 100 points among the following attributes (maximum 40 points per attribute).</i></p>
     <form onSubmit={handleSubmit}>
+    <div className='formContainer'>
       <div>
         <label htmlFor="attack">Attack:</label>
         <input type="number" id="attack" name="attack" value={formData.attack} onChange={handleInputChange} min="0" max="40" />
@@ -106,16 +108,37 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
         <label htmlFor="healthPool">Health Pool:</label>
         <input type="number" id="healthPool" name="healthPool" value={formData.healthPool} onChange={handleInputChange} min="0" max="40" />
       </div>
-      <div>
+    </div>
+      {/*<div>
           <label htmlFor="weapon">Select Weapon:</label>
           <select id="weapon" name="weapon" onChange={handleWeaponChange}>
             <option value="sword">Sword</option>
             <option value="spear">Spear</option>
             <option value="axe">Axe</option>
           </select>
+        </div>*/}
+      <div className='weapons'>
+        <h2>Select Weapon</h2>
+        <img
+              src={require("./images/axe/IDLE_000.png")} 
+              alt="Axe" title="Axe"
+              onClick={() => handleWeaponSelection('Axe')}
+              className={`weapon-image ${formData.weapon === 'Axe' ? 'selected' : ''}`}
+            />
+            <img
+              src={require("./images/lance/IDLE_000.png")}  
+              alt="Spear" title="Spear"
+              onClick={() => handleWeaponSelection('Spear')}
+              className={`weapon-image ${formData.weapon === 'Spear' ? 'selected' : ''}`}
+            />
+            <img
+              src={require("./images/sword/IDLE_000.png")}
+              alt="Sword" title="Sword"
+              onClick={() => handleWeaponSelection('Sword')}
+              className={`weapon-image ${formData.weapon === 'Sword' ? 'selected' : ''}`}
+            />
         </div>
-      <button type="submit">Generate Character</button>
-      <button type="reset">Reset</button>
+      <button className='generateButton' type="submit">Generate</button>
     </form>
   </div>
 
