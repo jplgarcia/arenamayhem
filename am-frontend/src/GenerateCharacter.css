@@ -1,3 +1,20 @@
+.main-div{
+    text-align: center;
+}
+
+h1{
+    margin-bottom: 10px;
+}
+
+p{
+    font-size: 0.6em;
+    font-weight: 300;
+    color: beige;
+    opacity: 40%;
+    font-family: "Seagram-Font", sans-serif;
+    margin-top: 0;
+}
+
 .weapon-image {
     border: 2px solid transparent;
     border-radius: 10px;
@@ -18,21 +35,43 @@
 }
 
 .generateButton {
-    /* background-image: linear-gradient(to right, #556270 0%, #FF6B6B  51%, #556270  100%); */
-   
    background: rgb(157, 12, 12);
    /*background: linear-gradient(90deg, rgba(63,94,251,1) 0%, rgba(252,70,107,1) 100%); */
    margin: 10px;
    padding: 15px 40px;
    border-radius: 10px;
    font-weight: 800;
+   font-family:fantasy;
+   color: bisque;
 }
 
 .formContainer{
-    display: flex;
-  flex-direction: column;
+  display: flex;
+  flex-direction:column;
   gap: 10px;
   column-gap: 30px;
+  color: beige;
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+
+.label-input{
+    display: flex;
+    align-items:center;
+    margin-bottom: 5px;
+    text-align: left;
+    justify-content: center;
+}
+
+label{
+    display: inline-block;
+    width: 100px;
+    font-size:large;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 }
   
+input{
+    font-family: fantasy;
+    font-weight:900;
+}
 

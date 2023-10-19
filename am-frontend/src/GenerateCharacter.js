@@ -86,30 +86,30 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
 
 
   return (
-    <div>
-      <h1>⚔️Generate your player</h1>
+    <div className='main-div'>
+      <h1>⚔️ Generate your player ⚔️</h1>
       <div>
-    <p><i>Allocate a total of 100 points among the following attributes (maximum 40 points per attribute).</i></p>
-    <form onSubmit={handleSubmit}>
-    <div className='formContainer'>
-      <div>
-        <label htmlFor="attack">Attack:</label>
-        <input type="number" id="attack" name="attack" value={formData.attack} onChange={handleInputChange} min="0" max="40" />
-      </div>
-      <div>
-        <label htmlFor="defense">Defense:</label>
-        <input type="number" id="defense" name="defense" value={formData.defense} onChange={handleInputChange} min="0" max="40" />
-      </div>
-      <div>
-        <label htmlFor="speed">Speed:</label>
-        <input type="number" id="speed" name="speed" value={formData.speed} onChange={handleInputChange} min="0" max="40" />
-      </div>
-      <div>
-        <label htmlFor="healthPool">Health Pool:</label>
-        <input type="number" id="healthPool" name="healthPool" value={formData.healthPool} onChange={handleInputChange} min="0" max="40" />
-      </div>
-    </div>
-      {/*<div>
+        <p><i>Distribute a total of 100 points among the following attributes,<br></br> with a maximum of 40 points allowed for each attribute.</i></p>
+        <form onSubmit={handleSubmit}>
+        <div className='formContainer'>
+          <div className='label-input'>
+            <label htmlFor="attack">Attack</label>
+            <input type="number" id="attack" name="attack" value={formData.attack} onChange={handleInputChange} min="0" max="40" />
+          </div>
+          <div className='label-input'>
+            <label htmlFor="defense">Defense</label>
+            <input type="number" id="defense" name="defense" value={formData.defense} onChange={handleInputChange} min="0" max="40" />
+          </div>
+          <div className='label-input'>
+            <label htmlFor="speed">Speed</label>
+            <input type="number" id="speed" name="speed" value={formData.speed} onChange={handleInputChange} min="0" max="40" />
+          </div>
+          <div className='label-input'>
+            <label htmlFor="healthPool">Health Pool</label>
+            <input type="number" id="healthPool" name="healthPool" value={formData.healthPool} onChange={handleInputChange} min="0" max="40" />
+          </div>
+        </div>
+          {/*<div>
           <label htmlFor="weapon">Select Weapon:</label>
           <select id="weapon" name="weapon" onChange={handleWeaponChange}>
             <option value="sword">Sword</option>

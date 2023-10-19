@@ -7,6 +7,20 @@
   pointer-events: none;
 }
 
+@font-face {
+  font-family: "Seagram-Font"; 
+  src: url('./fonts/Seagram.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: "SuezOne-Regular"; 
+  src: url('./fonts/SuezOne-Regular.ttf') format('truetype');
+}
+
+h1, h2, h3 {
+  font-family: "Seagram-Font", sans-serif; 
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
@@ -44,11 +58,11 @@
   display: block;
    
  }
-           .connectButton:hover {
-             background-position: right center; /* change the direction of the change here */
-             color: #fff;
-             text-decoration: none;
-           }
+.connectButton:hover {
+  background-position: right center; /* change the direction of the change here */
+  color: #fff;
+  text-decoration: none;
+}
  
  /* loading animation */
  .spinner {
@@ -75,11 +89,3 @@
   to { background-position: 0 100%; }
 }
 */
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}

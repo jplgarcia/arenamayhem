@@ -10,7 +10,7 @@ function App() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [characterGenerated, setCharacterGenerated] = useState(false);
   const [amountStaked, setAmountStaked] = useState(false);
-  const dappAddress = "0x70ac08179605AF2D9e75782b8DEcDD3c22aA4D0C"; //edit as per network
+  const dappAddress = "0x70ac08179605AF2D9e75782b8DEcDD3c22aA4D0C"; //edit as per deployment
 
   const checkIfWalletIsConnected = async () => {
     /** First make sure we have access to window.ethereum */
@@ -70,7 +70,6 @@ const handleCharacterGenerated = () => {
 const handleBettingSubmit = () => {
   setAmountStaked(true);
 };
-
 
   return (
     <div className="App-header">
