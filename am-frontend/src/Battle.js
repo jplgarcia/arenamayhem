@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import './Battle.css';
+import test from "./images/sword/ATTACK_000.png";
 
 
 
@@ -63,34 +64,23 @@ function Battle() {
         }
       };
     
-    let images = [];
-    function preload() {
-        let weapons = ["sword", "axe", "lance"]
-        let animations = [
-            "ATTACK",
-            "RUN",
-            "IDLE",
-            "WALK",
-            "HURT",
-            "DIE",
-            "JUMP"
-        ]
 
+
+    function preload() {
+        const rows2 = [];   
         for (const animation of animations) {
             for (const weapon of weapons) {
                 for (let index = 0; index < 10; index++) {
-                    let image = new Image()
-                    image.src = "images/" + weapon + "/" + animation +"_00" + index + ".png"
-                    images.push(image)
+                    
+                    let url = "./images/" + weapon + "/" + animation +"_00" + index + ".png"
+                    rows2.push(<link rel="preload" as="image" href={require(`${url}`)} />)
                 }
             }
         }
+        return rows2
     }
-    preload()
-    
 
     const Fight = async (input, players) => {
-        
 
         console.log("inside fight()", players)
         setPlayerHP(0, 100)
@@ -99,6 +89,8 @@ function Battle() {
         animate("retreat", 1, players[1].Weapon)
         animate("idle", 0, players[0].Weapon)
         animate("idle", 1, players[1].Weapon)
+        await new Promise(r => setTimeout(r, 1000))
+        await new Promise(r => setTimeout(r, 1000))
         await new Promise(r => setTimeout(r, 1000))
         await new Promise(r => setTimeout(r, 1000))
 
@@ -150,25 +142,40 @@ function Battle() {
     }
             
     useEffect(() => {
-    // Trigger the fight function when the component mounts
-    Fight(input, players);
+        // Trigger the fight function when the component mounts
+        Fight(input, players);
     }, []); // Empty dependency array ensures it runs only once on mount
     
-return(
-    <div>
-    <h3>Battle Arena</h3>
-    <div className='arena'>
-        <p>checking</p>
-        <div id="hp1-box" className="hp-box">
-            <div id="hp1-bar" className="hp-bar"></div>
+    let arr = []
+        
+    let weapons = ["sword", "axe", "lance"]
+    let animations = [
+        "ATTACK", "RUN", "IDLE",
+        "WALK", "HURT", "DIE", "JUMP"
+    ]
+
+    
+
+    return(
+        <div>
+        <h3>Battle Arena</h3>
+        { 
+            preload().map( (url) => url)
+        }
+        
+
+        <div className='arena'>
+            <p>checking</p>
+            <div id="hp1-box" className="hp-box">
+                <div id="hp1-bar" className="hp-bar"></div>
+            </div>
+            <div id="hp2-box" className="hp-box">
+                <div id="hp2-bar" className="hp-bar"></div>
+            </div>
+            <div id="player1" className="fighter"></div>
+            <div id="player2" className="fighter flipped right"></div>
         </div>
-        <div id="hp2-box" className="hp-box">
-            <div id="hp2-bar" className="hp-bar"></div>
         </div>
-        <div id="player1" className="fighter"></div>
-        <div id="player2" className="fighter flipped right"></div>
-    </div>
-    </div>
-)
+    )
 };
 export default Battle;
