@@ -3,9 +3,9 @@ import math
 def calculate_damage(attacker, defender):
     # Determine weapon triangle advantage
     advantage_multiplier = 1.0
-    if (attacker.weapon == 'sword' and defender.weapon == 'axe'
-     or attacker.weapon == 'axe'   and defender.weapon == 'lance'
-     or attacker.weapon == 'lance' and defender.weapon == 'sword'):
+    if ((attacker.weapon == 'sword' and defender.weapon == 'axe')
+     or (attacker.weapon == 'axe'   and defender.weapon == 'lance')
+     or (attacker.weapon == 'lance' and defender.weapon == 'sword')):
         advantage_multiplier = 1.2
 
     damage = int(attacker.ATK * advantage_multiplier - defender.DEF)
@@ -45,7 +45,7 @@ def turn(attacker, defender, log):
     defender.HP -= damage
 
     log.append(f"{attacker.name} attacks {defender.name} with {attacker.weapon} for {damage} damage.")
-    log.append(f"{defender.name}'s HP: {defender.HP}")
+    log.append(f"{defender.name}'s HP: {defender.HP} - {defender.HP*100/defender.total_hp}")
 
     return {
         "attacker_id"   : attacker.id,
@@ -66,6 +66,7 @@ def battle(char1, char2):
 
     char1.id   =  0;  char2.id  =  1
     char1.HP  *=  5; char2.HP  *=  5
+    char1.total_hp  *=  5; char2.total_hp  *=  5
     char1.ATK += 10; char2.ATK += 10
 
     # the attack order for the first round is based on SPD
@@ -76,6 +77,7 @@ def battle(char1, char2):
     while True:
         log.append(f"Round {current_round}:")
         turns = []
+        rounds.append(turns)
 
         # first strike
         turns.append(turn(attacker, defender, log))
@@ -107,7 +109,7 @@ def battle(char1, char2):
 
         attacker, defender = defender, attacker
         current_round += 1
-        rounds.append(turns)
+        
 
     # Determine the winner
     winner = char1 if char2.HP <= 0 else char2
@@ -115,9 +117,10 @@ def battle(char1, char2):
 
     return rounds, log
 
-# c1 = Character("TANK", "lance", 30, 20, 40, 10)
-# c2 = Character("DPS",  "axe",   20, 40, 10, 30)
-# result, log = battle(c1, c2)
-# for entry in log:
-#     print(entry)
+c1 = Character("TANK", "lance", 30, 20, 40, 10)
+c2 = Character("DPS",  "axe",   20, 40, 10, 30)
+result, log = battle(c1, c2)
+print(result)
+for entry in log:
+    print(entry)
 
