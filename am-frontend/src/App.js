@@ -3,12 +3,12 @@ import './App.css';
 import GenerateCharacter from'./GenerateCharacter.js'
 import StakeTokens from "./StakeTokens";
 import Battle from './Battle';
-//import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
-//import { Switch } from 'react-router';
+import RenderNotices from "./RenderNotices";
 
 function App() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [characterGenerated, setCharacterGenerated] = useState(false);
+  const [noticeGenerated, setNoticeGenerated] = useState("")
   const [amountStaked, setAmountStaked] = useState(false);
   const dappAddress = "0x70ac08179605AF2D9e75782b8DEcDD3c22aA4D0C"; //edit as per deployment
 
@@ -67,26 +67,40 @@ const handleCharacterGenerated = () => {
   setCharacterGenerated(true);
 };
 
+// Callback function to update noticeGenerated
+const handleNoticeGenerated = (notice) => {
+  setNoticeGenerated(notice);
+};
+
 const handleBettingSubmit = () => {
   setAmountStaked(true);
 };
 
   return (
-    <div className="App-header">
+    <div className="app-main">
     {currentAccount ? (
       characterGenerated ? (
         amountStaked ? (
-          <Battle />
+          <Battle noticeGenerated={noticeGenerated}/>
         ) : (
-        <StakeTokens dappAddress={dappAddress} onSubmit={handleBettingSubmit}/>
+          <div>
+          <RenderNotices onNoticeGenerated={handleNoticeGenerated}/>
+          <Battle />
+          {/*<StakeTokens dappAddress={dappAddress} onSubmit={handleBettingSubmit}/> */}
+          </div>
         ) 
       ) : (
-        <GenerateCharacter currentAccount={currentAccount} dappAddress={dappAddress} onCharacterGenerated={handleCharacterGenerated} />
+        <div>
+          <GenerateCharacter currentAccount={currentAccount} dappAddress={dappAddress} onCharacterGenerated={handleCharacterGenerated} />
+          {/* TODO - Add loading UI and pass notice payload to Battle */}
+          <Battle /> 
+        </div>
       )
     ) : (
-      <div>
-        <h1>Welcome to ArenaMayhem</h1>
-        <button onClick={connectWallet}>Connect Wallet</button>
+      <div className="app-items">
+        <h1>Arena Mayhem</h1>
+        <p className="app-desc"><i>An on-chain one-on-one automated fighter game where you can bet on players. <br></br> Connect your wallet, generate a charater to play with and watch the battle simulation.</i></p>
+        <button className='connectButton' onClick={connectWallet}>Connect Wallet</button>
       </div>
     )}
   </div>

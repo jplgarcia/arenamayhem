@@ -5,6 +5,7 @@ import { EtherPortal__factory, ERC20Portal__factory, IERC20__factory } from '@ca
 function StakeTokens({dappAddress, onSubmit}) {
     const ETHERPORTAL_ADDRESS = '0xFfdbe43d4c855BF7e0f105c400A50857f53AB044'
     const ERC20PORTAL_ADDRESS = '0x9C21AEb2093C32DDbC53eEF24B873BDCd1aDa1DB'
+    const token = 'DummyETH'
 
     const [betAmount, setBetAmount] = useState('');
 
@@ -13,13 +14,13 @@ function StakeTokens({dappAddress, onSubmit}) {
         setBetAmount(value);
     };
     const handleSubmit = () => {
-        console.log(betAmount);
+        console.log("Submitting bet amount: ",betAmount);
         //stakeEther(betAmount)
-        stakeERC20(betAmount)
+        stakeERC20(token, betAmount)
         onSubmit(true)
     };
     
-    
+    /*
     const stakeEther = async (amount)  => {
         // Start a connection
         const provider = new ethers.BrowserProvider(window.ethereum);
@@ -38,6 +39,7 @@ function StakeTokens({dappAddress, onSubmit}) {
         const receipt = await tx.wait(1)
         console.log("receipt generated...", receipt)
     };
+    */
 
     const stakeERC20 = async (token, amount)  => {
         // Start a connection
@@ -72,20 +74,27 @@ function StakeTokens({dappAddress, onSubmit}) {
         const receipt = await tx.wait(1)
         console.log("receipt generated...", receipt)
     };
-
-
+;
 
 return(
     <div>
-    <h3>Your character is ready!</h3>
-    <h1>Place your bet and enter arena!</h1>
-    <input
-        type="number"
-        value={betAmount}
-        onChange={handleInputChange}
-        placeholder="Enter your bet amount"
-      />
-      <button onClick={handleSubmit}>Submit Bet</button>
+        <div>
+        <h3>Your character is ready!</h3>
+        <h1>Place your bet and enter arena!</h1>
+        <input
+            type="number"
+            value={betAmount}
+            onChange={handleInputChange}
+            placeholder="Enter your bet amount"
+        />
+        <button onClick={handleSubmit}>Submit Bet</button>
+        {/*
+        </div>
+            <NoticeList />
+        <div>
+            */}
+            
+        </div>
     </div>
 )
 };

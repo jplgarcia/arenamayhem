@@ -113,7 +113,7 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
           <label htmlFor="weapon">Select Weapon:</label>
           <select id="weapon" name="weapon" onChange={handleWeaponChange}>
             <option value="sword">Sword</option>
-            <option value="spear">Spear</option>
+            <option value="lance">Lance</option>
             <option value="axe">Axe</option>
           </select>
         </div>*/}
@@ -127,9 +127,9 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
             />
             <img
               src={require("./images/lance/IDLE_000.png")}  
-              alt="Spear" title="Spear"
-              onClick={() => handleWeaponSelection('Spear')}
-              className={`weapon-image ${formData.weapon === 'Spear' ? 'selected' : ''}`}
+              alt="Lance" title="Lance"
+              onClick={() => handleWeaponSelection('Lance')}
+              className={`weapon-image ${formData.weapon === 'Lance' ? 'selected' : ''}`}
             />
             <img
               src={require("./images/sword/IDLE_000.png")}

@@ -1,0 +1,440 @@
+.arena {
+    width: 625px;
+    height: 300px;
+    background-color: #e0e0e0;
+    position: relative;
+    
+}
+
+.hp-box {
+    margin-top: 5px;
+    position: absolute;
+    display: inline-block;
+    width: 204px;
+    height: 14px;
+    border: 1px solid black;
+}
+
+.hp-bar {
+    position: absolute;
+    display: inline-block;
+    width: 200px;
+    height: 10px;
+    margin: 2px;
+    background-color: #52c349;
+    transition: all 0.5s ease;
+}
+
+#hp1-box {
+    left: 72px;
+}
+
+#hp2-box {
+    left: 348px;
+}
+
+.fighter {
+    display: inline-block;
+    width: 310px;
+    height: 300px;
+    background-image: url("images/sword/ATTACK_000.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    animation-name: sword-idle;
+    animation-duration: 1s;
+    animation-timing-function: step-start; /* Changes background-position at the start of the time */
+    animation-iteration-count: infinite;
+    position: absolute;
+    left: 0;
+}
+
+.sword {
+    background-image: url("images/sword/IDLE_000.png");
+    animation-name: sword-idle;
+}
+.axe {
+    background-image: url("images/axe/IDLE_000.png");
+    animation-name: axe-idle;
+}
+.lance {
+    background-image: url("images/lance/IDLE_000.png");
+    animation-name: lance-idle;
+}
+
+#player1 {
+    transition: left 1s ease;
+}
+
+
+
+.flipped {
+    transform: scaleX(-1);
+}
+
+.right {
+    transition: left 1s ease;
+    left: 310px;
+}
+
+.advanced {
+    transition: left 1s ease;
+    left: 155px;
+}
+
+/* Common keyframes for all animations */
+@keyframes animation-name {
+    0% {background-image: url("images/sword/IDLE_000.png");}
+    10% {background-image: url("images/sword/IDLE_001.png");}
+    20% {background-image: url("images/sword/IDLE_002.png");}
+    30% {background-image: url("images/sword/IDLE_003.png");}
+    40% {background-image: url("images/sword/IDLE_004.png");}
+    50% {background-image: url("images/sword/IDLE_005.png");}
+    60% {background-image: url("images/sword/IDLE_006.png");}
+    70% {background-image: url("images/sword/IDLE_007.png");}
+    80% {background-image: url("images/sword/IDLE_008.png");}
+    90% {background-image: url("images/sword/IDLE_009.png");}
+    100% {background-image: url("images/sword/IDLE_000.png");}
+}
+
+/* Keyframes for sword animations */
+@keyframes sword-idle {
+    0% {background-image: url("images/sword/IDLE_000.png");}
+    10% {background-image: url("images/sword/IDLE_001.png");}
+    20% {background-image: url("images/sword/IDLE_002.png");}
+    30% {background-image: url("images/sword/IDLE_003.png");}
+    40% {background-image: url("images/sword/IDLE_004.png");}
+    50% {background-image: url("images/sword/IDLE_005.png");}
+    60% {background-image: url("images/sword/IDLE_006.png");}
+    70% {background-image: url("images/sword/IDLE_007.png");}
+    80% {background-image: url("images/sword/IDLE_008.png");}
+    90% {background-image: url("images/sword/IDLE_009.png");}
+    100% {background-image: url("images/sword/IDLE_000.png");}
+}
+
+@keyframes sword-run {
+    0% {background-image: url("images/sword/RUN_000.png");}
+    10% {background-image: url("images/sword/RUN_001.png");}
+    20% {background-image: url("images/sword/RUN_002.png");}
+    30% {background-image: url("images/sword/RUN_003.png");}
+    40% {background-image: url("images/sword/RUN_004.png");}
+    50% {background-image: url("images/sword/RUN_005.png");}
+    60% {background-image: url("images/sword/RUN_006.png");}
+    70% {background-image: url("images/sword/RUN_007.png");}
+    80% {background-image: url("images/sword/RUN_008.png");}
+    90% {background-image: url("images/sword/RUN_009.png");}
+    100% {background-image: url("images/sword/RUN_000.png");}
+}
+
+@keyframes sword-attack {
+    0% {background-image: url("images/sword/ATTACK_000.png");}
+    10% {background-image: url("images/sword/ATTACK_001.png");}
+    20% {background-image: url("images/sword/ATTACK_002.png");}
+    30% {background-image: url("images/sword/ATTACK_003.png");}
+    40% {background-image: url("images/sword/ATTACK_004.png");}
+    50% {background-image: url("images/sword/ATTACK_005.png");}
+    60% {background-image: url("images/sword/ATTACK_006.png");}
+    70% {background-image: url("images/sword/ATTACK_007.png");}
+    80% {background-image: url("images/sword/ATTACK_008.png");}
+    90% {background-image: url("images/sword/ATTACK_009.png");}
+    100% {background-image: url("images/sword/ATTACK_000.png");}
+
+    /* Fill in values for other percentages and images for ATTACK */
+}
+
+@keyframes sword-hurt {
+    0% {background-image: url("images/sword/HURT_000.png");}
+    10% {background-image: url("images/sword/HURT_001.png");}
+    20% {background-image: url("images/sword/HURT_002.png");}
+    30% {background-image: url("images/sword/HURT_003.png");}
+    40% {background-image: url("images/sword/HURT_004.png");}
+    50% {background-image: url("images/sword/HURT_005.png");}
+    60% {background-image: url("images/sword/HURT_006.png");}
+    70% {background-image: url("images/sword/HURT_007.png");}
+    80% {background-image: url("images/sword/HURT_008.png");}
+    90% {background-image: url("images/sword/HURT_009.png");}
+    100% {background-image: url("images/sword/HURT_000.png");}
+    /* Fill in values for other percentages and images for HURT */
+}
+
+@keyframes sword-die {
+    0% {background-image: url("images/sword/DIE_000.png");}
+    10% {background-image: url("images/sword/DIE_001.png");}
+    20% {background-image: url("images/sword/DIE_002.png");}
+    30% {background-image: url("images/sword/DIE_003.png");}
+    40% {background-image: url("images/sword/DIE_004.png");}
+    50% {background-image: url("images/sword/DIE_005.png");}
+    60% {background-image: url("images/sword/DIE_006.png");}
+    70% {background-image: url("images/sword/DIE_007.png");}
+    80% {background-image: url("images/sword/DIE_008.png");}
+    90% {background-image: url("images/sword/DIE_009.png");}
+    100% {background-image: url("images/sword/DIE_000.png");}
+    /* Fill in values for other percentages and images for DIE */
+}
+
+@keyframes sword-dead {
+    0% {background-image: url("images/sword/DIE_009.png");}
+    10% {background-image: url("images/sword/DIE_009.png");}
+    20% {background-image: url("images/sword/DIE_009.png");}
+    30% {background-image: url("images/sword/DIE_009.png");}
+    40% {background-image: url("images/sword/DIE_009.png");}
+    50% {background-image: url("images/sword/DIE_009.png");}
+    60% {background-image: url("images/sword/DIE_009.png");}
+    70% {background-image: url("images/sword/DIE_009.png");}
+    80% {background-image: url("images/sword/DIE_009.png");}
+    90% {background-image: url("images/sword/DIE_009.png");}
+    100% {background-image: url("images/sword/DIE_009.png");}
+    /* Fill in values for other percentages and images for DIE */
+}
+
+@keyframes sword-jump {
+    0% {background-image: url("images/sword/JUMP_000.png");}
+    10% {background-image: url("images/sword/JUMP_001.png");}
+    20% {background-image: url("images/sword/JUMP_002.png");}
+    30% {background-image: url("images/sword/JUMP_003.png");}
+    40% {background-image: url("images/sword/JUMP_004.png");}
+    50% {background-image: url("images/sword/JUMP_005.png");}
+    60% {background-image: url("images/sword/JUMP_006.png");}
+    70% {background-image: url("images/sword/JUMP_007.png");}
+    80% {background-image: url("images/sword/JUMP_008.png");}
+    90% {background-image: url("images/sword/JUMP_009.png");}
+    100% {background-image: url("images/sword/JUMP_000.png");}
+    /* Fill in values for other percentages and images for JUMP */
+}
+
+@keyframes sword-walk {
+    0% {background-image: url("images/sword/WALK_000.png");}
+    10% {background-image: url("images/sword/WALK_001.png");}
+    20% {background-image: url("images/sword/WALK_002.png");}
+    30% {background-image: url("images/sword/WALK_003.png");}
+    40% {background-image: url("images/sword/WALK_004.png");}
+    50% {background-image: url("images/sword/WALK_005.png");}
+    60% {background-image: url("images/sword/WALK_006.png");}
+    70% {background-image: url("images/sword/WALK_007.png");}
+    80% {background-image: url("images/sword/WALK_008.png");}
+    90% {background-image: url("images/sword/WALK_009.png");}
+    100% {background-image: url("images/sword/WALK_000.png");}
+    /* Fill in values for other percentages and images for WALK */
+}
+
+/* Keyframes for lance animations */
+@keyframes lance-idle {
+    0% {background-image: url("images/lance/IDLE_000.png");}
+    10% {background-image: url("images/lance/IDLE_001.png");}
+    20% {background-image: url("images/lance/IDLE_002.png");}
+    30% {background-image: url("images/lance/IDLE_003.png");}
+    40% {background-image: url("images/lance/IDLE_004.png");}
+    50% {background-image: url("images/lance/IDLE_005.png");}
+    60% {background-image: url("images/lance/IDLE_006.png");}
+    70% {background-image: url("images/lance/IDLE_007.png");}
+    80% {background-image: url("images/lance/IDLE_008.png");}
+    90% {background-image: url("images/lance/IDLE_009.png");}
+    100% {background-image: url("images/lance/IDLE_000.png");}
+}
+
+@keyframes lance-run {
+    0% {background-image: url("images/lance/RUN_000.png");}
+    10% {background-image: url("images/lance/RUN_001.png");}
+    20% {background-image: url("images/lance/RUN_002.png");}
+    30% {background-image: url("images/lance/RUN_003.png");}
+    40% {background-image: url("images/lance/RUN_004.png");}
+    50% {background-image: url("images/lance/RUN_005.png");}
+    60% {background-image: url("images/lance/RUN_006.png");}
+    70% {background-image: url("images/lance/RUN_007.png");}
+    80% {background-image: url("images/lance/RUN_008.png");}
+    90% {background-image: url("images/lance/RUN_009.png");}
+    100% {background-image: url("images/lance/RUN_000.png");}
+}
+
+@keyframes lance-attack {
+    0% {background-image: url("images/lance/ATTACK_000.png");}
+    10% {background-image: url("images/lance/ATTACK_001.png");}
+    20% {background-image: url("images/lance/ATTACK_002.png");}
+    30% {background-image: url("images/lance/ATTACK_003.png");}
+    40% {background-image: url("images/lance/ATTACK_004.png");}
+    50% {background-image: url("images/lance/ATTACK_005.png");}
+    60% {background-image: url("images/lance/ATTACK_006.png");}
+    70% {background-image: url("images/lance/ATTACK_007.png");}
+    80% {background-image: url("images/lance/ATTACK_008.png");}
+    90% {background-image: url("images/lance/ATTACK_009.png");}
+    100% {background-image: url("images/lance/ATTACK_000.png");}
+
+    /* Fill in values for other percentages and images for ATTACK */
+}
+
+@keyframes lance-hurt {
+    0% {background-image: url("images/lance/HURT_000.png");}
+    10% {background-image: url("images/lance/HURT_001.png");}
+    20% {background-image: url("images/lance/HURT_002.png");}
+    30% {background-image: url("images/lance/HURT_003.png");}
+    40% {background-image: url("images/lance/HURT_004.png");}
+    50% {background-image: url("images/lance/HURT_005.png");}
+    60% {background-image: url("images/lance/HURT_006.png");}
+    70% {background-image: url("images/lance/HURT_007.png");}
+    80% {background-image: url("images/lance/HURT_008.png");}
+    90% {background-image: url("images/lance/HURT_009.png");}
+    100% {background-image: url("images/lance/HURT_000.png");}
+    /* Fill in values for other percentages and images for HURT */
+}
+
+@keyframes lance-die {
+    0% {background-image: url("images/lance/DIE_000.png");}
+    10% {background-image: url("images/lance/DIE_001.png");}
+    20% {background-image: url("images/lance/DIE_002.png");}
+    30% {background-image: url("images/lance/DIE_003.png");}
+    40% {background-image: url("images/lance/DIE_004.png");}
+    50% {background-image: url("images/lance/DIE_005.png");}
+    60% {background-image: url("images/lance/DIE_006.png");}
+    70% {background-image: url("images/lance/DIE_007.png");}
+    80% {background-image: url("images/lance/DIE_008.png");}
+    90% {background-image: url("images/lance/DIE_009.png");}
+    100% {background-image: url("images/lance/DIE_000.png");}
+    /* Fill in values for other percentages and images for DIE */
+}
+
+@keyframes lance-dead {
+    0% {background-image: url("images/lance/DIE_009.png");}
+    100% {background-image: url("images/lance/DIE_009.png");}
+    /* Fill in values for other percentages and images for DIE */
+}
+
+@keyframes lance-jump {
+    0% {background-image: url("images/lance/JUMP_000.png");}
+    10% {background-image: url("images/lance/JUMP_001.png");}
+    20% {background-image: url("images/lance/JUMP_002.png");}
+    30% {background-image: url("images/lance/JUMP_003.png");}
+    40% {background-image: url("images/lance/JUMP_004.png");}
+    50% {background-image: url("images/lance/JUMP_005.png");}
+    60% {background-image: url("images/lance/JUMP_006.png");}
+    70% {background-image: url("images/lance/JUMP_007.png");}
+    80% {background-image: url("images/lance/JUMP_008.png");}
+    90% {background-image: url("images/lance/JUMP_009.png");}
+    100% {background-image: url("images/lance/JUMP_000.png");}
+    /* Fill in values for other percentages and images for JUMP */
+}
+
+@keyframes lance-walk {
+    0% {background-image: url("images/lance/WALK_000.png");}
+    10% {background-image: url("images/lance/WALK_001.png");}
+    20% {background-image: url("images/lance/WALK_002.png");}
+    30% {background-image: url("images/lance/WALK_003.png");}
+    40% {background-image: url("images/lance/WALK_004.png");}
+    50% {background-image: url("images/lance/WALK_005.png");}
+    60% {background-image: url("images/lance/WALK_006.png");}
+    70% {background-image: url("images/lance/WALK_007.png");}
+    80% {background-image: url("images/lance/WALK_008.png");}
+    90% {background-image: url("images/lance/WALK_009.png");}
+    100% {background-image: url("images/lance/WALK_000.png");}
+    /* Fill in values for other percentages and images for JUMP */
+}
+
+/* Keyframes for axe animations */
+@keyframes axe-idle {
+    0% {background-image: url("images/axe/IDLE_000.png");}
+    10% {background-image: url("images/axe/IDLE_001.png");}
+    20% {background-image: url("images/axe/IDLE_002.png");}
+    30% {background-image: url("images/axe/IDLE_003.png");}
+    40% {background-image: url("images/axe/IDLE_004.png");}
+    50% {background-image: url("images/axe/IDLE_005.png");}
+    60% {background-image: url("images/axe/IDLE_006.png");}
+    70% {background-image: url("images/axe/IDLE_007.png");}
+    80% {background-image: url("images/axe/IDLE_008.png");}
+    90% {background-image: url("images/axe/IDLE_009.png");}
+    100% {background-image: url("images/axe/IDLE_000.png");}
+}
+
+@keyframes axe-run {
+    0% {background-image: url("images/axe/RUN_000.png");}
+    10% {background-image: url("images/axe/RUN_001.png");}
+    20% {background-image: url("images/axe/RUN_002.png");}
+    30% {background-image: url("images/axe/RUN_003.png");}
+    40% {background-image: url("images/axe/RUN_004.png");}
+    50% {background-image: url("images/axe/RUN_005.png");}
+    60% {background-image: url("images/axe/RUN_006.png");}
+    70% {background-image: url("images/axe/RUN_007.png");}
+    80% {background-image: url("images/axe/RUN_008.png");}
+    90% {background-image: url("images/axe/RUN_009.png");}
+    100% {background-image: url("images/axe/RUN_000.png");}
+}
+
+@keyframes axe-attack {
+    0% {background-image: url("images/axe/ATTACK_000.png");}
+    10% {background-image: url("images/axe/ATTACK_001.png");}
+    20% {background-image: url("images/axe/ATTACK_002.png");}
+    30% {background-image: url("images/axe/ATTACK_003.png");}
+    40% {background-image: url("images/axe/ATTACK_004.png");}
+    50% {background-image: url("images/axe/ATTACK_005.png");}
+    60% {background-image: url("images/axe/ATTACK_006.png");}
+    70% {background-image: url("images/axe/ATTACK_007.png");}
+    80% {background-image: url("images/axe/ATTACK_008.png");}
+    90% {background-image: url("images/axe/ATTACK_009.png");}
+    100% {background-image: url("images/axe/ATTACK_000.png");}
+
+    /* Fill in values for other percentages and images for ATTACK */
+}
+
+@keyframes axe-hurt {
+    0% {background-image: url("images/axe/HURT_000.png");}
+    10% {background-image: url("images/axe/HURT_001.png");}
+    20% {background-image: url("images/axe/HURT_002.png");}
+    30% {background-image: url("images/axe/HURT_003.png");}
+    40% {background-image: url("images/axe/HURT_004.png");}
+    50% {background-image: url("images/axe/HURT_005.png");}
+    60% {background-image: url("images/axe/HURT_006.png");}
+    70% {background-image: url("images/axe/HURT_007.png");}
+    80% {background-image: url("images/axe/HURT_008.png");}
+    90% {background-image: url("images/axe/HURT_009.png");}
+    100% {background-image: url("images/axe/HURT_000.png");}
+    /* Fill in values for other percentages and images for HURT */
+}
+
+@keyframes axe-die {
+    0% {background-image: url("images/axe/DIE_000.png");}
+    10% {background-image: url("images/axe/DIE_001.png");}
+    20% {background-image: url("images/axe/DIE_002.png");}
+    30% {background-image: url("images/axe/DIE_003.png");}
+    40% {background-image: url("images/axe/DIE_004.png");}
+    50% {background-image: url("images/axe/DIE_005.png");}
+    60% {background-image: url("images/axe/DIE_006.png");}
+    70% {background-image: url("images/axe/DIE_007.png");}
+    80% {background-image: url("images/axe/DIE_008.png");}
+    90% {background-image: url("images/axe/DIE_009.png");}
+    100% {background-image: url("images/axe/DIE_000.png");}
+    /* Fill in values for other percentages and images for DIE */
+}
+
+@keyframes axe-dead {
+    0% {background-image: url("images/axe/DIE_009.png");}
+    100% {background-image: url("images/axe/DIE_009.png");}
+    /* Fill in values for other percentages and images for DIE */
+}
+
+@keyframes axe-jump {
+    0% {background-image: url("images/axe/JUMP_000.png");}
+    10% {background-image: url("images/axe/JUMP_001.png");}
+    20% {background-image: url("images/axe/JUMP_002.png");}
+    30% {background-image: url("images/axe/JUMP_003.png");}
+    40% {background-image: url("images/axe/JUMP_004.png");}
+    50% {background-image: url("images/axe/JUMP_005.png");}
+    60% {background-image: url("images/axe/JUMP_006.png");}
+    70% {background-image: url("images/axe/JUMP_007.png");}
+    80% {background-image: url("images/axe/JUMP_008.png");}
+    90% {background-image: url("images/axe/JUMP_009.png");}
+    100% {background-image: url("images/axe/JUMP_000.png");}
+    /* Fill in values for other percentages and images for JUMP */
+}
+
+@keyframes axe-walk {
+    0% {background-image: url("images/axe/WALK_000.png");}
+    10% {background-image: url("images/axe/WALK_001.png");}
+    20% {background-image: url("images/axe/WALK_002.png");}
+    30% {background-image: url("images/axe/WALK_003.png");}
+    40% {background-image: url("images/axe/WALK_004.png");}
+    50% {background-image: url("images/axe/WALK_005.png");}
+    60% {background-image: url("images/axe/WALK_006.png");}
+    70% {background-image: url("images/axe/WALK_007.png");}
+    80% {background-image: url("images/axe/WALK_008.png");}
+    90% {background-image: url("images/axe/WALK_009.png");}
+    100% {background-image: url("images/axe/WALK_000.png");}
+    /* Fill in values for other percentages and images for WALK */
+}

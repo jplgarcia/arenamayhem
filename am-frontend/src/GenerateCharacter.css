@@ -1,9 +1,18 @@
 .main-div{
     text-align: center;
+    background-color: rgb(40, 44, 52, 0.9);
+    padding: 40px;
+    border-width: 5px;
+    border-radius: 15px;
+    border-style: groove;
+    margin-top: 20px;
+    margin-bottom: 20px;
 }
 
-h1{
+h1, h2{
     margin-bottom: 10px;
+    color: beige;
+    margin-top: 0px;
 }
 
 p{
@@ -19,7 +28,7 @@ p{
     border: 2px solid transparent;
     border-radius: 10px;
     transition: border-color 0.3s ease;
-    width: 150px; /* Adjust the width to your desired thumbnail size */
+    width: 150px; 
     height: auto; /* Maintain aspect ratio */
   }
 
@@ -35,7 +44,7 @@ p{
 }
 
 .generateButton {
-   background: rgb(157, 12, 12);
+    background: #a62757;
    /*background: linear-gradient(90deg, rgba(63,94,251,1) 0%, rgba(252,70,107,1) 100%); */
    margin: 10px;
    padding: 15px 40px;
