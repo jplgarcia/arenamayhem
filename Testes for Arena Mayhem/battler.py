@@ -1,4 +1,3 @@
-import random
 import math
 
 def calculate_damage(attacker, defender):
