@@ -1,80 +1,105 @@
-Report issues later:
+Here's an improved version of your README.md file with better formatting and explanations:
 
-// Update dependencies of auction app to 0.12.2
-// Add NETWORK="localhost" on hostmode to run auction
+# Ape Coins Battle System
 
---------------------
+## Single Player Mode
 
-START APP
-// after interrupting with ctrl+c docker compose -f ../docker-compose.yml -f ./docker-compose.override.yml -f ../docker-compose-host.yml down -v
+### Deposit ERC20 to be Distributed (Ape Coins)
 
-docker compose -f ../docker-compose.yml -f ./docker-compose.override.yml -f ../docker-compose-host.yml up
+To deposit a specific amount of ERC20 (Ape Coins), use the following command:
 
-ROLLUP_HTTP_SERVER_URL="http://127.0.0.1:5004" NETWORK=localhost python3 -m auction.dapp
+```bash
+yarn start erc20 deposit --amount 20,000,000,000,000,000,000
+```
 
----------------------
+### Issue a Battle
 
-SINGLE PLAYER MODE
+Create a new battle with the specified minimum bid amount:
 
-// DEPOIST AMOUNT OF ERC20 TO BE DISTRIBUTED (APE COINS HERE)
-
-yarn start erc20 deposit --amount 20000000000000000000
-
-
-// ISSUE A BATTLE, min_bid_amount is how much will be payed for each battle
-
-yarn start input send --payload '{                                                  
-    "method": "create",
-    "args": {
-        "erc20": "0x2797a6a6d9d94633ba700b52ad99337ddafa3f52",
-        "min_bid_amount": 100000000000000000
-    }
+```bash
+yarn start input send --payload '{
+  "method": "create",
+  "args": {
+    "erc20": "0x2797a6a6d9d94633ba700b52ad99337ddafa3f52",
+    "min_bid_amount": 100,000,000,000,000,000
+  }
 }'
+```
 
-// optional view balances
-yarn start inspect --payload  balance/0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-yarn start inspect --payload  balance/0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+### Optional: View Balances
 
+Check the balances of two accounts:
 
-// Other individual starts this battle if wins gets money
+```bash
+yarn start inspect --payload balance/0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+yarn start inspect --payload balance/0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+```
 
+### Other Player Joins the Battle
+
+Another player can join the battle and potentially win money by bidding. Provide character details for the battle:
+
+```bash
 yarn start input send --accountIndex 1 --payload '{
-    "method": "bid",
-    "args": {
-        "erc20": "0x2797a6a6d9d94633ba700b52ad99337ddafa3f52",
-        "characters": [{
-            "name": "Tank",
-            "weapon": "sword",
-            "hp": 30,
-            "atk": 20,
-            "def": 40,
-            "spd": 10
-        }, {
-            "name": "DPS",
-            "weapon": "axe",
-            "hp": 20,
-            "atk": 40,
-            "def": 10,
-            "spd": 30
-        }]
-    }
+  "method": "bid",
+  "args": {
+    "erc20": "0x2797a6a6d9d94633ba700b52ad99337ddafa3f52",
+    "characters": [{
+      "name": "Tank",
+      "weapon": "sword",
+      "hp": 30,
+      "atk": 20,
+      "def": 40,
+      "spd": 10
+    }, {
+      "name": "DPS",
+      "weapon": "axe",
+      "hp": 20,
+      "atk": 40,
+      "def": 10,
+      "spd": 30
+    }]
+  }
 }'
+```
 
-// optional view balances
-yarn start inspect --payload  balance/0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
-yarn start inspect --payload  balance/0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+### Optional: View Balances
 
-// Withdraw money - this will create a voucher to be executed
+Check the updated balances of the accounts after the battle:
+
+```bash
+yarn start inspect --payload balance/0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+yarn start inspect --payload balance/0x70997970C51812dc3A010C7d01b50e0d17dc79C8
+```
+
+### Withdraw Money
+
+Initiate a withdrawal to receive your earnings. This will create a voucher to be executed later:
+
+```bash
 yarn start input send --accountIndex 1 --payload '{
-    "method": "erc20withdrawal",
-    "args": {
-        "erc20": "0x2797a6a6d9d94633ba700b52ad99337ddafa3f52",
-        "amount": 100000000000000000
-    }
+  "method": "erc20withdrawal",
+  "args": {
+    "erc20": "0x2797a6a6d9d94633ba700b52ad99337ddafa3f52",
+    "amount": 100,000,000,000,000,000
+  }
 }'
+```
 
-// pass time
+### Pass Time
+
+Advance the Ethereum Virtual Machine (EVM) time by a specified duration using `curl`. This can be useful for testing time-dependent functionalities:
+
+```bash
 curl --data '{"id":1337,"jsonrpc":"2.0","method":"evm_increaseTime","params":[864010]}' http://localhost:8545
+```
 
-// execute voucher - note: change the value after --input to the input of the voucher
+### Execute Voucher
+
+After creating a voucher, execute it by providing the voucher index and its input value:
+
+```bash
 yarn start voucher execute --index 0 --input 20
+```
+
+Feel free to add any additional context or explanations that your users might find helpful.
