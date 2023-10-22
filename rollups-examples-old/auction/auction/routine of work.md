@@ -77,4 +77,4 @@ yarn start input send --accountIndex 1 --payload '{
 curl --data '{"id":1337,"jsonrpc":"2.0","method":"evm_increaseTime","params":[864010]}' http://localhost:8545
 
 // execute voucher - note: change the value after --input to the input of the voucher
-yarn start voucher execute --index 0 --input 20
+yarn start voucher execute --index 0 --input 3
