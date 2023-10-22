@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  server_manager:
+    image: cartesi/rollups-host-runner:1.0.0
+    ports:
+      - "5004:5004"
+    environment:
+      - RUST_LOG=warn
+  dispatcher:
+    environment:
+      RD_EPOCH_DURATION: 86400
+
+  advance_runner:
+    environment:
+      - SNAPSHOT_ENABLED=false
