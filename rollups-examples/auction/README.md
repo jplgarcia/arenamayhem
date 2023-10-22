@@ -13,6 +13,11 @@ Once the battle ends, tokens are distributed within the application and can be w
 
 ## Single Player Mode
 
+
+### Requirements
+
+https://docs.cartesi.io/cartesi-rollups/build-dapps/requirements/
+
 ### Deposit ERC20 to be Distributed 
 
 To deposit a specific amount of ERC20 (ETH/Ape Coins), use the following command:
