@@ -8,9 +8,44 @@ import RenderNotices from "./RenderNotices";
 function App() {
   const [currentAccount, setCurrentAccount] = useState("");
   const [characterGenerated, setCharacterGenerated] = useState(false);
-  const [noticeGenerated, setNoticeGenerated] = useState("")
+  const [noticeGenerated, setNoticeGenerated] = useState(false)
   const [amountStaked, setAmountStaked] = useState(false);
+  const [roundsLog, setRoundsLog] = useState("")
+  const [winner, setWinner] = useState("")
+  const [userCharacter, setUserCharacter] = useState("")
+  const [noticePayload, setNoticePayload] = useState("")
   const dappAddress = "0x70ac08179605AF2D9e75782b8DEcDD3c22aA4D0C"; //edit as per deployment
+  /*
+  const cpuCharacter = {
+    name: 'TANK',
+    atk: 20,
+    spd: 10,
+    def: 40,
+    hp: 30,
+    weapon: 'lance',
+  };
+  */
+ const hardcodeRounds = [[{"attacker_id": 0, "attacker_name": "user", "defender_name": "CPU", "damage": 15, "defender_hp": 88.0}, 
+ {"attacker_id": 1, "attacker_name": "CPU", "defender_name": "user", "damage": 15, "defender_hp": 85.0}], 
+ [{"attacker_id": 1, "attacker_name": "CPU", "defender_name": "user", "damage": 17, "defender_hp": 68.0}, 
+ {"attacker_id": 0, "attacker_name": "user", "defender_name": "CPU", "damage": 17, "defender_hp": 74.4}], 
+ [{"attacker_id": 0, "attacker_name": "user", "defender_name": "CPU", "damage": 19, "defender_hp": 59.2}, 
+ {"attacker_id": 1, "attacker_name": "CPU", "defender_name": "user", "damage": 19, "defender_hp": 49.0}], 
+ [{"attacker_id": 1, "attacker_name": "CPU", "defender_name": "user", "damage": 23, "defender_hp": 26.0}, 
+ {"attacker_id": 0, "attacker_name": "user", "defender_name": "CPU", "damage": 23, "defender_hp": 40.8}], 
+ [{"attacker_id": 0, "attacker_name": "user", "defender_name": "CPU", "damage": 27, "defender_hp": 19.2}, 
+ {"attacker_id": 1, "attacker_name": "CPU", "defender_name": "user", "damage": 27, "defender_hp": -1.0}]]
+
+  const [players, setPlayers] = useState([
+    {
+      name: 'CPU', // Initialize CPU player
+      atk: 25,
+      spd: 25,
+      def: 25,
+      hp: 25,
+      weapon: 'Axe',
+    },
+  ])
 
   const checkIfWalletIsConnected = async () => {
     /** First make sure we have access to window.ethereum */
@@ -63,13 +98,29 @@ function App() {
   }, [])
 
 // Callback function to update characterGenerated
-const handleCharacterGenerated = () => {
+const handleCharacterGenerated = (userData) => {
+  console.log("user data from GC component: ", userData)
+  setPlayers([userData, ...players])
+  console.log("players set: ", players)
   setCharacterGenerated(true);
+  setUserCharacter(userData)
 };
 
 // Callback function to update noticeGenerated
-const handleNoticeGenerated = (notice) => {
-  setNoticeGenerated(notice);
+const handleNoticeGenerated = (noticePayload) => {
+  const validJSONString = noticePayload
+  .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": ')
+  .replace(/'/g, '"');
+  console.log("Notice Payload at App: ", noticePayload)
+  const jsonString = `{${noticePayload}`;
+  const payloadObject = JSON.parse(jsonString);
+  //const payloadObject = JSON.parse(hardcodeRounds)
+  console.log("Rounds log from obj: ", payloadObject.rounds)
+  setRoundsLog(payloadObject.rounds);
+  //console.log("Rounds log from json: ", roundsLog)
+  setNoticeGenerated(true)
+  //setWinner(payloadObject.winner);
+  //console.log("winner set as: ", winner)
 };
 
 const handleBettingSubmit = () => {
@@ -80,20 +131,16 @@ const handleBettingSubmit = () => {
     <div className="app-main">
     {currentAccount ? (
       characterGenerated ? (
-        amountStaked ? (
-          <Battle noticeGenerated={noticeGenerated}/>
+        noticeGenerated ? (
+          <Battle roundsLog={roundsLog} players={players} notice={noticePayload} />
         ) : (
           <div>
-          <RenderNotices onNoticeGenerated={handleNoticeGenerated}/>
-          <Battle />
-          {/*<StakeTokens dappAddress={dappAddress} onSubmit={handleBettingSubmit}/> */}
+            <RenderNotices onNoticeGenerated={handleNoticeGenerated} /> 
           </div>
         ) 
       ) : (
         <div>
-          <GenerateCharacter currentAccount={currentAccount} dappAddress={dappAddress} onCharacterGenerated={handleCharacterGenerated} />
-          {/* TODO - Add loading UI and pass notice payload to Battle */}
-          <Battle /> 
+          <GenerateCharacter currentAccount={currentAccount} dappAddress={dappAddress} onCharacterGenerated={handleCharacterGenerated} /> 
         </div>
       )
     ) : (

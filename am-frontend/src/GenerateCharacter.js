@@ -8,23 +8,40 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
   //const HARDHAT_DEFAULT_MNEMONIC = "test test test test test test test test test test test junk";
   //const HARDHAT_LOCALHOST_RPC_URL = "http://localhost:8545";
   const INPUTBOX_ADDRESS = "0x59b22D57D4f067708AB0c00552767405926dc768";
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    attack: 0,
-    defense: 0,
-    speed: 0,
-    healthPool: 0,
+    name: 'user',
+    atk: 0,
+    spd: 0,
+    def: 0,
+    hp: 0,
     weapon: 'none', 
   })
+  const cpuCharacter = {
+    name: 'CPU',
+    atk: 25,
+    spd: 25,
+    def: 25,
+    hp: 25,
+    weapon: 'Lance',
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    const newValue = parseInt(value, 10);
 
-    if (!isNaN(newValue) && newValue >= 0 && newValue <= 40) {
+    if (name === 'name' || name === 'weapon') {
       setFormData({
         ...formData,
-        [name]: newValue,
+        [name]: value,
       });
+    } else {
+      const newValue = parseInt(value, 10);
+      if (!isNaN(newValue) && newValue >= 0 && newValue <= 40) {
+        setFormData({
+          ...formData,
+          [name]: newValue,
+        });
+      }
     }
   };
 
@@ -35,18 +52,41 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
       weapon,
     });
   };
-  
-  const handleSubmit = (e) => {
+/*
+  const handleNameChange = (e) => {
+    const name = e;
+    setFormData({
+      ...formData,
+      name,
+    });
+  };
+*/
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const total = formData.attack + formData.defense + formData.speed + formData.healthPool;
+    const total = formData.atk + formData.def + formData.spd + formData.hp;
     if (total !== 100) {
       console.log('Total points must equal 100. Please adjust your allocations.');
     } else {
-      onCharacterGenerated(); //fallback function to render staking component
-      const jsonData = JSON.stringify(formData);
-      console.log('Form submitted successfully.', jsonData);
-      console.log('Selected weapon:', formData.weapon);
-      addInputOnchain(jsonData)
+      try {
+        setLoading(true);
+        const characters = [formData, cpuCharacter]
+        const characterDataJSON = {
+          characters: characters,
+        };
+        const jsonData = JSON.stringify(characterDataJSON, null, 2);
+        console.log('Form submitted successfully.', jsonData);
+        console.log('Selected weapon:', formData.weapon);
+        //adding 
+        await addInputOnchain(jsonData)
+        onCharacterGenerated(formData); //fallback function to render next component
+        //check if reciept is generated successfull, send data back to app.js
+
+      }
+      catch (error) {
+        console.error('Error submitting the form:', error);
+      } finally {
+        setLoading(false); // Clear loading, whether successful or not
+      }
     }
   };
 
@@ -57,6 +97,7 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
             HARDHAT_DEFAULT_MNEMONIC,
             `m/44'/60'/0'/0/0`
         ).connect(provider); */
+      try{
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();  
 
@@ -80,6 +121,11 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
         console.log("waiting for confirmation...")
         const receipt = await tx.wait(1)
         console.log("receipt generated...", receipt)
+      }
+      catch (error) {
+        console.error('Error adding input on chain:', error);
+        throw error; 
+      }
   };
   
 ; 
@@ -93,20 +139,24 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
         <form onSubmit={handleSubmit}>
         <div className='formContainer'>
           <div className='label-input'>
-            <label htmlFor="attack">Attack</label>
-            <input type="number" id="attack" name="attack" value={formData.attack} onChange={handleInputChange} min="0" max="40" />
+            <label htmlFor="name">Name</label>
+            <input type="text" id="name" name="name" value={formData.name} onChange={handleInputChange} />
           </div>
           <div className='label-input'>
-            <label htmlFor="defense">Defense</label>
-            <input type="number" id="defense" name="defense" value={formData.defense} onChange={handleInputChange} min="0" max="40" />
+            <label htmlFor="atk">Attack</label>
+            <input type="number" id="atk" name="atk" value={formData.atk} onChange={handleInputChange} min="0" max="40" />
           </div>
           <div className='label-input'>
-            <label htmlFor="speed">Speed</label>
-            <input type="number" id="speed" name="speed" value={formData.speed} onChange={handleInputChange} min="0" max="40" />
+            <label htmlFor="def">Defense</label>
+            <input type="number" id="def" name="def" value={formData.def} onChange={handleInputChange} min="0" max="40" />
           </div>
           <div className='label-input'>
-            <label htmlFor="healthPool">Health Pool</label>
-            <input type="number" id="healthPool" name="healthPool" value={formData.healthPool} onChange={handleInputChange} min="0" max="40" />
+            <label htmlFor="spd">Speed</label>
+            <input type="number" id="spd" name="spd" value={formData.spd} onChange={handleInputChange} min="0" max="40" />
+          </div>
+          <div className='label-input'>
+            <label htmlFor="hp">Health Pool</label>
+            <input type="number" id="hp" name="hp" value={formData.hp} onChange={handleInputChange} min="0" max="40" />
           </div>
         </div>
           {/*<div>
@@ -139,6 +189,7 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
             />
         </div>
       <button className='generateButton' type="submit">Generate</button>
+      {loading ? (<p className='loading-text'>Loading...</p>) : ("")}
     </form>
   </div>
 

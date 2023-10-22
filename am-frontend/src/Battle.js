@@ -1,10 +1,8 @@
 import React, {useState, useEffect} from 'react';
 import './Battle.css';
-import test from "./images/sword/ATTACK_000.png";
 
-
-
-function Battle() {
+function Battle({roundsLog, players}) {
+    /*
     const [players, setPlayers] = useState([
         {
           Name: 'TANK',
@@ -23,8 +21,9 @@ function Battle() {
           Weapon: 'axe',
         },
       ]);
+      */
 
-    const [input, setInput] = useState([[{'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 20, 'defender_hp': 86.66666666666667}, {'attacker_id': 0, 'attacker_name': 'TANK', 'defender_name': 'DPS', 'damage': 20, 'defender_hp': 80.0}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 20, 'defender_hp': 73.33333333333333}], [{'attacker_id': 0, 'attacker_name': 'TANK', 'defender_name': 'DPS', 'damage': 22, 'defender_hp': 58.0}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 22, 'defender_hp': 58.666666666666664}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 22, 'defender_hp': 44.0}], [{'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 25, 'defender_hp': 27.333333333333332}, {'attacker_id': 0, 'attacker_name': 'TANK', 'defender_name': 'DPS', 'damage': 24, 'defender_hp': 34.0}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 25, 'defender_hp': 10.666666666666666}], [{'attacker_id': 0, 'attacker_name': 'TANK', 'defender_name': 'DPS', 'damage': 28, 'defender_hp': 6.0}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 29, 'defender_hp': -8.666666666666666}]])
+    //const [input, setInput] = useState([[{'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 20, 'defender_hp': 86.66666666666667}, {'attacker_id': 0, 'attacker_name': 'TANK', 'defender_name': 'DPS', 'damage': 20, 'defender_hp': 80.0}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 20, 'defender_hp': 73.33333333333333}], [{'attacker_id': 0, 'attacker_name': 'TANK', 'defender_name': 'DPS', 'damage': 22, 'defender_hp': 58.0}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 22, 'defender_hp': 58.666666666666664}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 22, 'defender_hp': 44.0}], [{'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 25, 'defender_hp': 27.333333333333332}, {'attacker_id': 0, 'attacker_name': 'TANK', 'defender_name': 'DPS', 'damage': 24, 'defender_hp': 34.0}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 25, 'defender_hp': 10.666666666666666}], [{'attacker_id': 0, 'attacker_name': 'TANK', 'defender_name': 'DPS', 'damage': 28, 'defender_hp': 6.0}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 29, 'defender_hp': -8.666666666666666}]])
 
     const setPlayerHP = (player, hp) => {
         let bar
@@ -83,12 +82,23 @@ function Battle() {
     const Fight = async (input, players) => {
 
         console.log("inside fight()", players)
+        //Begin fight if we have the notice
+        /*
+        if(!noticeGenerated)
+            {
+                console.log("Loading...fetching notice!")
+                return }
+        else
+            {
+
+            setInput(roundsData)}
+        */
         setPlayerHP(0, 100)
         setPlayerHP(1, 100)
-        animate("retreat", 0, players[0].Weapon)
-        animate("retreat", 1, players[1].Weapon)
-        animate("idle", 0, players[0].Weapon)
-        animate("idle", 1, players[1].Weapon)
+        animate("retreat", 0, players[0].weapon)
+        animate("retreat", 1, players[1].weapon)
+        animate("idle", 0, players[0].weapon)
+        animate("idle", 1, players[1].weapon)
         await new Promise(r => setTimeout(r, 1000))
         await new Promise(r => setTimeout(r, 1000))
         await new Promise(r => setTimeout(r, 1000))
@@ -101,20 +111,20 @@ function Battle() {
         for (let round of input) {
             const advancer = round[0].attacker_id
             
-            animate("advance", advancer, players[advancer].Weapon)
+            animate("advance", advancer, players[advancer].weapon)
             await new Promise(r => setTimeout(r, 1000))
 
             for (const turn of round) {
                 const striker = turn.attacker_id
                 const other = striker === 0 ? 1 : 0
 
-                animate("attack", striker, players[striker].Weapon)
-                animate("hurt", other, players[other].Weapon)
+                animate("attack", striker, players[striker].weapon)
+                animate("hurt", other, players[other].weapon)
                 setPlayerHP(other, turn.defender_hp)
                 await new Promise(r => setTimeout(r, 1000))
 
-                animate("idle", striker, players[striker].Weapon)
-                animate("idle", other, players[other].Weapon)
+                animate("idle", striker, players[striker].weapon)
+                animate("idle", other, players[other].weapon)
             }
 
             if (!--iterations) {
@@ -123,19 +133,19 @@ function Battle() {
                 const lastTurn = round.length - 1
                 const winner = round[lastTurn].attacker_id
                 const loser = winner === 0 ? 1 : 0
-                animate("jump", winner, players[winner].Weapon)
-                animate("die", loser, players[loser].Weapon)
+                animate("jump", winner, players[winner].weapon)
+                animate("die", loser, players[loser].weapon)
                 await new Promise(r => setTimeout(r, 1000))
 
-                animate("dead", loser, players[loser].Weapon)
+                animate("dead", loser, players[loser].weapon)
                 await new Promise(r => setTimeout(r, 1000))
 
-                animate("idle", winner, players[winner].Weapon)
+                animate("idle", winner, players[winner].weapon)
             } else {
-                animate("retreat", advancer, players[advancer].Weapon)
+                animate("retreat", advancer, players[advancer].weapon)
                 await new Promise(r => setTimeout(r, 1000))
 
-                animate("idle", advancer, players[advancer].Weapon)
+                animate("idle", advancer, players[advancer].weapon)
             }
         }  
             
@@ -143,8 +153,8 @@ function Battle() {
             
     useEffect(() => {
         // Trigger the fight function when the component mounts
-        Fight(input, players);
-    }, []); // Empty dependency array ensures it runs only once on mount
+        Fight(roundsLog, players);
+    }, []); // dependency array ensures it runs when input changes
     
     let arr = []
         
@@ -157,24 +167,26 @@ function Battle() {
     
 
     return(
-        <div>
-        <h3>Battle Arena</h3>
-        { 
-            preload().map( (url) => url)
-        }
-        
-
-        <div className='arena'>
-            <p>checking</p>
-            <div id="hp1-box" className="hp-box">
-                <div id="hp1-bar" className="hp-bar"></div>
+        <div className='arena-main'>
+            <h3>Battle Arena</h3>
+            { 
+                preload().map( (url) => url)
+            }
+            
+            <div className='arena'>
+                <div id="hp1-box" className="hp-box">
+                    <div id="hp1-bar" className="hp-bar">
+                    <p>{players[0].name}</p>
+                    </div>
+                </div>
+                <div id="hp2-box" className="hp-box">
+                    <div id="hp2-bar" className="hp-bar">
+                    <p>{players[1].name}</p>
+                    </div>
+                </div>
+                <div id="player1" className="fighter"></div>
+                <div id="player2" className="fighter flipped right"></div>
             </div>
-            <div id="hp2-box" className="hp-box">
-                <div id="hp2-bar" className="hp-bar"></div>
-            </div>
-            <div id="player1" className="fighter"></div>
-            <div id="player2" className="fighter flipped right"></div>
-        </div>
         </div>
     )
 };
