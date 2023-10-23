@@ -52,15 +52,7 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
       weapon,
     });
   };
-/*
-  const handleNameChange = (e) => {
-    const name = e;
-    setFormData({
-      ...formData,
-      name,
-    });
-  };
-*/
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const total = formData.atk + formData.def + formData.spd + formData.hp;
@@ -78,8 +70,7 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
         console.log('Selected weapon:', formData.weapon);
         //adding 
         await addInputOnchain(jsonData)
-        onCharacterGenerated(formData); //fallback function to render next component
-        //check if reciept is generated successfull, send data back to app.js
+        onCharacterGenerated(formData); //fallback function to send data back to parent component - App
 
       }
       catch (error) {
@@ -91,12 +82,6 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
   };
 
   const addInputOnchain = async (str)  => {
-        // Start a connection
-        //const provider = new JsonRpcProvider(HARDHAT_LOCALHOST_RPC_URL);
-        /* const signer = ethers.HDNodeWallet.fromMnemonic(
-            HARDHAT_DEFAULT_MNEMONIC,
-            `m/44'/60'/0'/0/0`
-        ).connect(provider); */
       try{
         const provider = new ethers.BrowserProvider(window.ethereum);
         const signer = await provider.getSigner();  
@@ -129,8 +114,6 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
   };
   
 ; 
-
-
   return (
     <div className='main-div'>
       <h1>⚔️ Generate your player ⚔️</h1>
@@ -159,14 +142,6 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
             <input type="number" id="hp" name="hp" value={formData.hp} onChange={handleInputChange} min="0" max="40" />
           </div>
         </div>
-          {/*<div>
-          <label htmlFor="weapon">Select Weapon:</label>
-          <select id="weapon" name="weapon" onChange={handleWeaponChange}>
-            <option value="sword">Sword</option>
-            <option value="lance">Lance</option>
-            <option value="axe">Axe</option>
-          </select>
-        </div>*/}
       <div className='weapons'>
         <h2>Select Weapon</h2>
         <img
@@ -187,7 +162,7 @@ function GenerateCharacter({ currentAccount, dappAddress, onCharacterGenerated }
               onClick={() => handleWeaponSelection('Sword')}
               className={`weapon-image ${formData.weapon === 'Sword' ? 'selected' : ''}`}
             />
-        </div>
+      </div>
       <button className='generateButton' type="submit">Generate</button>
       {loading ? (<p className='loading-text'>Loading...</p>) : ("")}
     </form>

@@ -1,9 +1,8 @@
 import { useQuery, gql } from '@apollo/client';
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { ethers } from 'ethers';
 
-// GraphQL query to retrieve notices given a cursor
-
+// GraphQL query to retrieve notice
 const GET_LATEST_NOTICE = gql`
   query latestNotice {
     notices(first: 1) {
@@ -17,7 +16,7 @@ const GET_LATEST_NOTICE = gql`
 `;
 
 function RenderNotices({onNoticeGenerated}) {
-    const [noticeList, setNoticeList] = useState([]);
+    // Execute the GraphQL query to fetch the latest notice
     const { loading, error, data } = useQuery(GET_LATEST_NOTICE, {pollInterval: 500});
 
     useEffect(() => {
@@ -34,20 +33,11 @@ function RenderNotices({onNoticeGenerated}) {
           if (latestNotice) {
             const noticePayload = ethers.toUtf8String(latestNotice.node.payload);
             console.log(`Latest notice payload: ${noticePayload}`);
-            onNoticeGenerated(noticePayload); // Call the callback function
+            onNoticeGenerated(noticePayload); // Call the callback function to send notice back to parent component - App
           }
         }
       }, [data, onNoticeGenerated]);
     return null
-    /*
-    return (
-        <div>
-        <div>
-            <h3>Loading Arena...fetching notices</h3>
-        </div>
-        <div>{console.log("REDNERING rendernotices ", onNoticeGenerated)}</div>
-        </div>
-    ); */
 }
 
 export default RenderNotices;

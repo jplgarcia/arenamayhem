@@ -2,28 +2,7 @@ import React, {useState, useEffect} from 'react';
 import './Battle.css';
 
 function Battle({roundsLog, players}) {
-    /*
-    const [players, setPlayers] = useState([
-        {
-          Name: 'TANK',
-          ATK: 20,
-          SPD: 10,
-          DEF: 40,
-          HP: 30,
-          Weapon: 'lance',
-        },
-        {
-          Name: 'DPS',
-          ATK: 40,
-          SPD: 30,
-          DEF: 10,
-          HP: 20,
-          Weapon: 'axe',
-        },
-      ]);
-      */
-
-    //const [input, setInput] = useState([[{'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 20, 'defender_hp': 86.66666666666667}, {'attacker_id': 0, 'attacker_name': 'TANK', 'defender_name': 'DPS', 'damage': 20, 'defender_hp': 80.0}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 20, 'defender_hp': 73.33333333333333}], [{'attacker_id': 0, 'attacker_name': 'TANK', 'defender_name': 'DPS', 'damage': 22, 'defender_hp': 58.0}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 22, 'defender_hp': 58.666666666666664}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 22, 'defender_hp': 44.0}], [{'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 25, 'defender_hp': 27.333333333333332}, {'attacker_id': 0, 'attacker_name': 'TANK', 'defender_name': 'DPS', 'damage': 24, 'defender_hp': 34.0}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 25, 'defender_hp': 10.666666666666666}], [{'attacker_id': 0, 'attacker_name': 'TANK', 'defender_name': 'DPS', 'damage': 28, 'defender_hp': 6.0}, {'attacker_id': 1, 'attacker_name': 'DPS', 'defender_name': 'TANK', 'damage': 29, 'defender_hp': -8.666666666666666}]])
+    const [winner, setWinner] = useState(null)
 
     const setPlayerHP = (player, hp) => {
         let bar
@@ -82,17 +61,6 @@ function Battle({roundsLog, players}) {
     const Fight = async (input, players) => {
 
         console.log("inside fight()", players)
-        //Begin fight if we have the notice
-        /*
-        if(!noticeGenerated)
-            {
-                console.log("Loading...fetching notice!")
-                return }
-        else
-            {
-
-            setInput(roundsData)}
-        */
         setPlayerHP(0, 100)
         setPlayerHP(1, 100)
         animate("retreat", 0, players[0].weapon)
@@ -132,6 +100,7 @@ function Battle({roundsLog, players}) {
                 //gotta check who was the last to strike to see the winner
                 const lastTurn = round.length - 1
                 const winner = round[lastTurn].attacker_id
+                setWinner(players[winner].name)
                 const loser = winner === 0 ? 1 : 0
                 animate("jump", winner, players[winner].weapon)
                 animate("die", loser, players[loser].weapon)
@@ -168,7 +137,7 @@ function Battle({roundsLog, players}) {
 
     return(
         <div className='arena-main'>
-            <h3>Battle Arena</h3>
+            <h1>Battle Arena</h1>
             { 
                 preload().map( (url) => url)
             }
@@ -176,17 +145,18 @@ function Battle({roundsLog, players}) {
             <div className='arena'>
                 <div id="hp1-box" className="hp-box">
                     <div id="hp1-bar" className="hp-bar">
-                    <p>{players[0].name}</p>
+                    <p className='player-name'>{players[0].name}</p>
                     </div>
                 </div>
                 <div id="hp2-box" className="hp-box">
                     <div id="hp2-bar" className="hp-bar">
-                    <p>{players[1].name}</p>
+                    <p className='player-name'>{players[1].name}</p>
                     </div>
                 </div>
                 <div id="player1" className="fighter"></div>
                 <div id="player2" className="fighter flipped right"></div>
             </div>
+            {winner ? (<h3 className='winner'>⚔️ Winner ⚔️ <h3 className='winner-name'>{winner}</h3></h3>) : ("")}
         </div>
     )
 };

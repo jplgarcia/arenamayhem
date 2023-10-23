@@ -11,31 +11,9 @@ function App() {
   const [noticeGenerated, setNoticeGenerated] = useState(false)
   const [amountStaked, setAmountStaked] = useState(false);
   const [roundsLog, setRoundsLog] = useState("")
-  const [winner, setWinner] = useState("")
   const [userCharacter, setUserCharacter] = useState("")
   const [noticePayload, setNoticePayload] = useState("")
   const dappAddress = "0x70ac08179605AF2D9e75782b8DEcDD3c22aA4D0C"; //edit as per deployment
-  /*
-  const cpuCharacter = {
-    name: 'TANK',
-    atk: 20,
-    spd: 10,
-    def: 40,
-    hp: 30,
-    weapon: 'lance',
-  };
-  */
- const hardcodeRounds = [[{"attacker_id": 0, "attacker_name": "user", "defender_name": "CPU", "damage": 15, "defender_hp": 88.0}, 
- {"attacker_id": 1, "attacker_name": "CPU", "defender_name": "user", "damage": 15, "defender_hp": 85.0}], 
- [{"attacker_id": 1, "attacker_name": "CPU", "defender_name": "user", "damage": 17, "defender_hp": 68.0}, 
- {"attacker_id": 0, "attacker_name": "user", "defender_name": "CPU", "damage": 17, "defender_hp": 74.4}], 
- [{"attacker_id": 0, "attacker_name": "user", "defender_name": "CPU", "damage": 19, "defender_hp": 59.2}, 
- {"attacker_id": 1, "attacker_name": "CPU", "defender_name": "user", "damage": 19, "defender_hp": 49.0}], 
- [{"attacker_id": 1, "attacker_name": "CPU", "defender_name": "user", "damage": 23, "defender_hp": 26.0}, 
- {"attacker_id": 0, "attacker_name": "user", "defender_name": "CPU", "damage": 23, "defender_hp": 40.8}], 
- [{"attacker_id": 0, "attacker_name": "user", "defender_name": "CPU", "damage": 27, "defender_hp": 19.2}, 
- {"attacker_id": 1, "attacker_name": "CPU", "defender_name": "user", "damage": 27, "defender_hp": -1.0}]]
-
   const [players, setPlayers] = useState([
     {
       name: 'CPU', // Initialize CPU player
@@ -97,35 +75,28 @@ function App() {
     checkIfWalletIsConnected();
   }, [])
 
-// Callback function to update characterGenerated
-const handleCharacterGenerated = (userData) => {
-  console.log("user data from GC component: ", userData)
-  setPlayers([userData, ...players])
-  console.log("players set: ", players)
-  setCharacterGenerated(true);
-  setUserCharacter(userData)
-};
+  // Callback function to update characterGenerated
+  const handleCharacterGenerated = (userData) => {
+    console.log("user data from GC component: ", userData)
+    setPlayers([userData, ...players])
+    console.log("players set: ", players)
+    setCharacterGenerated(true);
+    setUserCharacter(userData)
+  };
 
-// Callback function to update noticeGenerated
-const handleNoticeGenerated = (noticePayload) => {
-  const validJSONString = noticePayload
-  .replace(/(['"])?([a-zA-Z0-9_]+)(['"])?:/g, '"$2": ')
-  .replace(/'/g, '"');
-  console.log("Notice Payload at App: ", noticePayload)
-  const jsonString = `{${noticePayload}`;
-  const payloadObject = JSON.parse(jsonString);
-  //const payloadObject = JSON.parse(hardcodeRounds)
-  console.log("Rounds log from obj: ", payloadObject.rounds)
-  setRoundsLog(payloadObject.rounds);
-  //console.log("Rounds log from json: ", roundsLog)
-  setNoticeGenerated(true)
-  //setWinner(payloadObject.winner);
-  //console.log("winner set as: ", winner)
-};
+  // Callback function to update noticeGenerated
+  const handleNoticeGenerated = (noticePayload) => {
+    console.log("Notice Payload at App: ", noticePayload)
+    const jsonString = `{${noticePayload}`;
+    const payloadObject = JSON.parse(jsonString);
+    console.log("Rounds log from obj: ", payloadObject.rounds)
+    setRoundsLog(payloadObject.rounds);
+    setNoticeGenerated(true)
+  };
 
-const handleBettingSubmit = () => {
-  setAmountStaked(true);
-};
+  const handleBettingSubmit = () => {
+    setAmountStaked(true);
+  };
 
   return (
     <div className="app-main">
@@ -146,30 +117,12 @@ const handleBettingSubmit = () => {
     ) : (
       <div className="app-items">
         <h1>Arena Mayhem</h1>
-        <p className="app-desc"><i>An on-chain one-on-one automated fighter game where you can bet on players. <br></br> Connect your wallet, generate a charater to play with and watch the battle simulation.</i></p>
+        <p className="app-desc"><i>A decentralized automated fighter game where you can bet on players. <br></br> Connect your wallet, generate a character to play with and watch the battle simulation.</i></p>
         <button className='connectButton' onClick={connectWallet}>Connect Wallet</button>
       </div>
     )}
   </div>
   ); 
-  /*
-  return (
-    <div>
-    {currentAccount ? (
-      characterGenerated ? (
-        <StakeTokens dappAddress={dappAddress}/>
-      ) : (
-        <GenerateCharacter currentAccount={currentAccount} dappAddress={dappAddress} onCharacterGenerated={handleCharacterGenerated} />
-      )
-    ) : (
-      <div>
-        <h1>Welcome to ArenaMayhem</h1>
-        <button onClick={connectWallet}>Connect Wallet</button>
-      </div>
-    )}
-  </div>
-  );
-*/
 }
 
 export default App;

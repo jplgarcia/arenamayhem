@@ -1,5 +1,27 @@
 .arena-main{
-    background-color: rgba(250, 235, 215, 0.038);
+    text-align: center;
+    background-color: rgb(40, 44, 52, 0.9);
+    padding: 40px;
+    border-width: 5px;
+    border-radius: 15px;
+    border-style: groove;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+h1, h2, h3{
+    margin-bottom: 10px;
+    color: beige;
+    margin-top: 0px;
+}
+
+.player-name {
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    color: black;
+    padding-bottom: 2px;
+}
+.winner-name{
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
 }
 
 .arena {
@@ -15,18 +37,20 @@
     position: absolute;
     display: inline-block;
     width: 204px;
-    height: 14px;
+    height: 20px;
     border: 1px solid black;
+    text-align: left;
 }
 
 .hp-bar {
     position: absolute;
     display: inline-block;
     width: 200px;
-    height: 10px;
+    height: 16px;
     margin: 2px;
     background-color: #52c349;
     transition: all 0.5s ease;
+    text-align: center;
 }
 
 #hp1-box {
