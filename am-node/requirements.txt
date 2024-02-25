@@ -1,0 +1,4 @@
+cytoolz == 0.12.2
+requests == 2.31.0
+eth_abi == 4.0.0
+routes == 2.5.0
