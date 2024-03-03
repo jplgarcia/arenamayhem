@@ -56,7 +56,8 @@ export class HistoryComponent {
   async playFight(fightInfo: any) {
     
     const dialogRef = this.dialog.open(FightComponent, {
-      width: '625px',
+      width: '875px',
+      height: '420px',
       data: fightInfo // You can pass data to the dialog here
     });
 

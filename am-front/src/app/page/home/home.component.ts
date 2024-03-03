@@ -16,6 +16,7 @@ import { VoucherComponent } from '../../dialog/voucher/voucher.component';
 import { SHA256, enc } from 'crypto-js';
 import { FighterComponent } from '../../dialog/fighter/fighter.component';
 import { ethers } from 'ethers';
+import { FightComponent } from '../../dialog/fight/fight.component';
 
 
 @Component({
@@ -93,10 +94,11 @@ export class HomeComponent {
     }
 
     const dialogRef = this.dialog.open(FighterComponent, {
-      width: '650px',
+      width: '875px',
+      height: '420px',
       data: {message: "You are starting the fight" , value: this.ctsiToBet, fighter: fighterBuild } // You can pass data to the dialog here
     });
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe(async result => {
       let fighter : any = result
       if (!fighter){
         return
@@ -107,9 +109,33 @@ export class HomeComponent {
         fighter,
         challenge_id: report.id
       }))
+      while(true) {
+        let gqlreply = await this.graphqlService.getUserBattles(this.onboardService.getConnectedWallet())
+        let notice
+        for (let item of gqlreply) {
+          if (item.challenge_id != report.challenge_id) {
+            continue
+          }
+          notice = item    
+        }
+        if (notice) {
+          console.log("FOUNDDD")
+          console.log(notice)
+          const dialogRef = this.dialog.open(FightComponent, {
+            width: '650px',
+            data: notice // You can pass data to the dialog here
+          });
+          break
+        }
+        await this.sleep()
+      }
+
     });
   }
 
+  sleep () {
+    return new Promise(resolve=> setTimeout(resolve, 5000))
+  }
   async inspectUserBattles() {
     let inspectReply = await this.httpService.get("user_battles/"+this.userAddress)
     this.inspectReply = JSON.parse(inspectReply)

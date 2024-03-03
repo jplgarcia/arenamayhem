@@ -15,6 +15,6 @@
 <mat-list>
     <p mat-list-item *ngFor="let report of inspectReply">
         Game ID: {{report.id}} - Value: {{report.amount}} - Status: {{report.status}} 
-        <button mt-flat-button color="primary" *ngIf="report.status == 'accepted'" (click)="confirmFighter(report)">Start Fight!</button>
+        <button mat-flat-button color="basic" *ngIf="report.status == 'accepted'" (click)="confirmFighter(report)">Start Fight!</button>
     </p>
 </mat-list>
