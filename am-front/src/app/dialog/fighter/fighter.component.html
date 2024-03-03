@@ -1,0 +1,47 @@
+<form (submit)="execute()">
+    <p>{{message}}</p>
+    <p *ngIf="message != 'You are starting the fight'">The value of the bet is: {{value}}</p>
+    <p *ngIf="message == 'You are starting the fight'">You have to re-submit the exact data of the fighter. In case you don't you will automatically lose</p>
+
+    <p>The the fighter stat total can't exced 100 and each stat can't exced 40</p>
+    
+    <mat-form-field appearance="fill">
+        <mat-label>Fighter Name</mat-label>
+        <input matInput [(ngModel)]="name" name="name" type="text" required>
+    </mat-form-field>
+    &nbsp;
+    <mat-form-field>
+    <mat-label>Select an option</mat-label>
+    <mat-select [(value)]="weapon" required>
+        <mat-option value="sword">Sword</mat-option>
+        <mat-option value="lance">Lance</mat-option>
+        <mat-option value="axe">Axe</mat-option>
+    </mat-select>
+    </mat-form-field>
+    <br/>
+    <mat-form-field appearance="fill">
+        <mat-label>HP</mat-label>
+        <input matInput [(ngModel)]="hp" name="hp" type="number" required>
+    </mat-form-field>
+    &nbsp;
+    <mat-form-field appearance="fill">
+        <mat-label>Attack</mat-label>
+        <input matInput [(ngModel)]="atk" name="atk" type="number" required>
+    </mat-form-field>
+    <br/>
+    <mat-form-field appearance="fill">
+        <mat-label>Defense</mat-label>
+        <input matInput [(ngModel)]="def" name="def" type="number" required>
+    </mat-form-field>
+    &nbsp;
+    <mat-form-field appearance="fill">
+        <mat-label>Speed</mat-label>
+        <input matInput [(ngModel)]="spd" name="spd" type="number" required>
+    </mat-form-field>
+    <br/>
+    
+    <button *ngIf="message == 'You are accepting a challenge'" mat-flat-button color="primary" type="submit">Accept Challenge</button>
+    <button *ngIf="message == 'You are creating a challenge'" mat-flat-button color="primary" type="submit">Create Challenge</button>
+    <button *ngIf="message == 'You are starting the fight'" mat-flat-button color="primary" type="submit">Confirm Fighter</button>
+
+    </form>

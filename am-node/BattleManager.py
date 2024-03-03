@@ -12,9 +12,25 @@ class BattleManager:
         self.wallet = wallet
 
     def list_matches(self):
-        return self.challenges.values()
+        return list(self.challenges.values())
+    
+    def list_user_matches(self, user):
+        challenge_list = self.challenges.values()
+        user_list = []
+        for chall in challenge_list:
+            if chall['owner'].lower() == user.lower():
+                user_list.append(chall)
+        return user_list
 
     def create_challenge(self, owner_id, fighter_hash, token, amount):
+        balance = self.wallet.balance_get(owner_id)
+        token_balance = balance.erc20_get(token)
+        if token_balance <= 2* amount:
+            raise Exception("User does not have enough balance to propose such a duel")
+        
+        self.wallet.erc20_transfer(owner_id, "0x0", token, amount) ## How much the user is betting
+        self.wallet.erc20_transfer(owner_id, "0x0", token, amount) ## The staking as colateral
+
         # Creates a new challenge
         challenge_id = self._generate_match_id()
         self.challenges[challenge_id] = {
@@ -26,13 +42,6 @@ class BattleManager:
             'status': 'pending',  # possible statuses: pending, accepted
             'opponent': None
         }
-        balance = self.wallet.balance_get(owner_id)
-        token_balance = balance.erc20_get(token)
-        if token_balance <= 2* amount:
-            raise Exception("User does not have enough balance to propose such a duel")
-        
-        self.wallet.erc20_transfer(owner_id, "0x0", token, amount) ## How much the user is betting
-        self.wallet.erc20_transfer(owner_id, "0x0", token, amount) ## The staking as colateral
 
         return self.challenges[challenge_id]
 
@@ -82,7 +91,7 @@ class BattleManager:
         opponent_id = challenge['opponent']
         token = challenge['token']
         amount = challenge['amount']
-        if (char1.is_cheater() or self._hash_matches_fighter(fighter, challenge['fighter_hash'])):
+        if (char1.is_cheater() or not self._hash_matches_fighter(fighter, challenge['fighter_hash'])):
             ## ends duel and player 2 gets everything, even the stake
             self.challenges.pop(challenge_id)
             self.wallet.erc20_transfer("0x0", opponent_id, token, amount) # their money
@@ -111,9 +120,16 @@ class BattleManager:
         notice_payload['owner_id'] = sender_id
         notice_payload['opponent_id'] = opponent_id
         notice_payload['game_id'] = challenge_id
+        notice_payload['fighters'] = [
+            fighter,
+            challenge['opponent_fighter']
+        ]
 
-        report_payload = log
-        report_payload['game_id'] = challenge_id
+        report_payload = { 
+            "rounds": result['rounds'],
+            "log": log,
+            'game_id': challenge_id
+        }
 
         return notice_payload, report_payload
 
@@ -124,7 +140,7 @@ class BattleManager:
     
     def _hash_matches_fighter(self, fighter, hash):
         d = fighter
-        input_string = "-".join([d["name"], d["weapon"], d["hp"], d["atk"], d["def"], d["spd"]])
+        input_string = "-".join([d["name"], d["weapon"], str(d["hp"]), str(d["atk"]), str(d["def"]), str(d["spd"])])
         prove = hashlib.sha256(input_string.encode()).hexdigest()
         if hash != prove:
             return False

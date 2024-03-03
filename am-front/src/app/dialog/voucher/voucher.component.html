@@ -1,0 +1,29 @@
+<div class="container">
+    <div *ngIf="!loaded">
+        <div mat-dialog-content>
+            <p>Loading.</p>
+        </div>
+    </div>
+
+    <div *ngIf="loaded && !executed">
+        <h1 mat-dialog-title></h1>
+        <div mat-dialog-content>
+        <p>Confirm Voucher:</p>
+        <p>{{data.plainText}}</p>
+
+        </div>
+        <div mat-dialog-actions>
+            <button mat-flat-button color="primary" (click)="execute()">Confirm</button>
+        </div>
+    </div>
+
+    <div *ngIf="loaded && executed">
+        <h1 mat-dialog-title></h1>
+        <div mat-dialog-content>
+            <p>This Voucher was already executed</p>
+            <p>{{data.plainText}}</p>
+
+        </div>
+
+    </div>
+</div>

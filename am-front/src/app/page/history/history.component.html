@@ -1,0 +1,7 @@
+<button mat-flat-button color="primary" (click)="getUserBattlesHistory()">Refresh</button>
+<mat-list>
+    <p mat-list-item *ngFor="let notice of gqlreply">
+        Game ID: {{notice.game_id}} - Opponent: {{notice.opponenct_id}}
+        <button mat-flat-button color="basic" (click)="playFight(notice)">View Battle</button>
+    </p>
+</mat-list>

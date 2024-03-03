@@ -1,10 +1,12 @@
-# Arena Mayhem
+# Arena Mayhem Frontend
 
-Welcome to Arena Mayhem! This repository contains two distinct applications: Arena Mayhem with a user interface and Arena Mayhem's backend. These apps were developed as a proof of concept for a hackathon, bringing you an exciting world of gladiator battles and blockchain technology.
+Welcome to Arena Mayhem! 
+
+This app was developed as a proof of concept for a hackathon and later developed to an MVP version, bringing you an exciting world of gladiator battles and blockchain technology.
 
 ## Overview
 
-In both apps, Arena Mayhem offers an exhilarating fighting game that allows users to create their own gladiators and challenge their friends or CPUs to epic battles. To enter the arena, participants stake a chosen amount of tokens, which should be ERC-20 tokens like ETH, APE, or any other following the protocol.
+Arena Mayhem offers an exhilarating fighting game that allows users to create their own gladiators and challenge their friends to epic battles. To enter the arena, participants stake a chosen amount of tokens, which is an ERC-20 token. It can be changed in to source code to the ones like like ETH, APE, or any other following the protocol.
 
 ### How it Works
 
@@ -19,7 +21,7 @@ We chose Cartesi to run the battle logic because it allows for the implementatio
 
 ### Witness the Battle
 
-After the algorithm finishes its calculations and log generation, players can watch their gladiators in action through a captivating animation created with the React frontend. Every step of the fighters' attacks and the gradual decay of their health is displayed throughout the battle.
+After the algorithm finishes its calculations and log generation, players can watch their gladiators in action through a captivating animation created with the Angular frontend. Every step of the fighters' attacks and the gradual decay of their health is displayed throughout the battle.
 
 ### Claim Your Victory
 
@@ -27,13 +29,11 @@ When the battle concludes, tokens are distributed within the application and can
 
 ## Technology Stack
 
-- **Frontend**: The entire frontend is developed with React. All assets, including fonts, images, and sprites for animations, are sourced from the internet.
+- **Frontend**: The entire frontend is developed with Angular. All assets, including fonts, images, and sprites for animations, are sourced from the internet.
 
-- **Backend**: The backend is developed using Python and runs inside the Cartesi machine. This version only performs battles without staking of betting
+- **Backend**: The backend is developed using Python and runs inside the Cartesi machine.
 
-- **Frontend-Backend Interaction**: The frontend interacts with the backend within the "arena-node" directory, built with Sunodo.
-
-- **Alternative Backend**: An alternative backend, not yet integrated with the frontend, can be found in the "rollups-examples/auction" directory. This version is built on top of the auction app from Rollups examples. This version is the one that integrates functions such as deposits and withdraws. 
+- **Frontend-Backend Interaction**: The frontend interacts with the backend within the "am-node" directory, built with Sunodo.
 
 ## Getting Started
 

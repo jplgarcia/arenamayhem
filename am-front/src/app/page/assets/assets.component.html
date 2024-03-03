@@ -1,0 +1,52 @@
+<button mat-stroked-button color="primary" type="submit" (click)="updateBalance()">Refresh</button>
+
+<p>CTSI Token Balance: {{ erc20balance }} </p>
+
+<br/>
+
+<form (submit)="submitSunodoDeposit()">
+<mat-form-field appearance="fill">
+    <mat-label>Sunodo Token Amount</mat-label>
+    <input matInput [(ngModel)]="sunodoDepositAmount" name="sunodoDepositAmount" type="number" required>
+</mat-form-field>
+&nbsp;
+<button mat-flat-button color="primary" type="submit">Deposit</button>
+</form>
+
+<form (submit)="submitSunodoWithdraw()">
+<mat-form-field appearance="fill">
+    <mat-label>Sunodo Token</mat-label>
+    <input matInput [(ngModel)]="sunodoWithdrawAmount" name="sunodoWithdrawAmount" type="number" required>
+</mat-form-field>
+&nbsp;
+<button mat-flat-button color="primary" type="submit">Request Withdraw</button>
+</form>
+
+<form (submit)="submitSunodoTransfer()">
+<mat-form-field appearance="fill">
+    <mat-label>Destination</mat-label>
+    <input matInput [(ngModel)]="sunodoTransferAddress" name="sunodoTransferAddress" type="string" required>
+</mat-form-field>
+&nbsp;
+<mat-form-field appearance="fill">
+    <mat-label>Sunodo Token</mat-label>
+    <input matInput [(ngModel)]="sunodoTransferAmount" name="sunodoTransferAmount" type="number" required>
+</mat-form-field>
+&nbsp;
+<button mat-flat-button color="primary" type="submit">Transfer</button>
+</form>
+
+
+<button mat-stroked-button color="accent" (click)="loadRequests()">Load Requests</button>
+
+<mat-list>
+    <a mat-list-item *ngFor="let voucher of vouchers">
+        {{voucher.method}}: {{voucher.amount}}
+        <button mat-icon-button color="accent" (click)="openRequest(voucher)">
+            <mat-icon>
+                pageview
+            </mat-icon>
+        </button>
+    </a>
+
+</mat-list>
