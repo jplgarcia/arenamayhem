@@ -1,7 +1,8 @@
 
 <form (submit)="createChallenge()" color="secondary">
-<mat-label color="secondary">CTSI to bet</mat-label> &nbsp;
 <mat-form-field appearance="fill">
+    <mat-label color="secondary">Wage in tokens</mat-label>
+
     <input matInput [(ngModel)]="ctsiToBet" name="ctsiToBet" type="number" required color="secondary">
 </mat-form-field>
 
@@ -9,12 +10,19 @@
 <button mat-flat-button color="primary" type="submit">Create Challenge</button>
 </form>
 
-<hr/>
+<br/>
 
 <button mat-flat-button color="primary" (click)="inspectUserBattles()">Refresh</button>
 <mat-list>
-    <p mat-list-item *ngFor="let report of inspectReply">
-        Game ID: {{report.id}} - Value: {{report.amount}} - Status: {{report.status}} 
-        <button mt-flat-button color="primary" *ngIf="report.status == 'accepted'" (click)="confirmFighter(report)">Start Fight!</button>
-    </p>
+    <div mat-list-item *ngFor="let report of inspectReply">
+        <hr/><br/>
+        Game ID: {{report.id}} - Value: {{report.amount}}<br/>
+        Status: <a class="status {{report.status}}">{{report.status}}</a><br/>
+        Opponent: 
+        <a *ngIf="report.status == 'accepted'" class="mono">{{report.opponent}}</a>
+        <a *ngIf="report.status != 'accepted'" class="mono">waiting...</a>
+        <br/> <br/> 
+        <button mat-flat-button color="basic" *ngIf="report.status == 'accepted'" (click)="confirmFighter(report)">Start Fight!</button>
+        <br/>
+    </div>
 </mat-list>

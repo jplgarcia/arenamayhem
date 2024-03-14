@@ -1,4 +1,4 @@
-<button mat-stroked-button color="primary" type="submit" (click)="updateBalance()">Refresh</button>
+<button mat-flat-button color="primary" type="submit" (click)="updateBalance()">Refresh</button>
 
 <p>CTSI Token Balance: {{ erc20balance }} </p>
 
@@ -37,7 +37,7 @@
 </form>
 
 
-<button mat-stroked-button color="accent" (click)="loadRequests()">Load Requests</button>
+<button mat-flat-button color="accent" (click)="loadRequests()">Load Requests</button>
 
 <mat-list>
     <a mat-list-item *ngFor="let voucher of vouchers">

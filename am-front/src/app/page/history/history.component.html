@@ -1,7 +1,11 @@
 <button mat-flat-button color="primary" (click)="getUserBattlesHistory()">Refresh</button>
 <mat-list>
-    <p mat-list-item *ngFor="let notice of gqlreply">
-        Game ID: {{notice.game_id}} - Opponent: {{notice.opponenct_id}}
-        <button mat-flat-button color="basic" (click)="playFight(notice)">View Battle</button>
-    </p>
+    <div mat-list-item *ngFor="let notice of gqlreply">
+        _________________________________<br/><br/>
+        Game ID: {{notice.game_id}}<br/>
+        Player 1: <a class="mono">{{notice.owner_id}}</a> - Fighter: {{notice.fighters[0].name}} - Weapon: {{notice.fighters[0].weapon}}<br/>
+        Player 2: <a class="mono">{{notice.opponent_id}}</a> - Fighter: {{notice.fighters[1].name}} - Weapon: {{notice.fighters[1].weapon}}<br/>
+        <div class="winner-box">Winner: &nbsp;<div class="spoiler">&nbsp;{{notice.winner.name}}&nbsp;</div></div><br/>
+        <button mat-flat-button color="basic" (click)="playFight(notice)">View Battle</button><br/>
+    </div>
 </mat-list>

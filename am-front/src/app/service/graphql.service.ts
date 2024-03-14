@@ -151,7 +151,11 @@ export class GraphqlService {
       let newItem = item.node
       let str = Buffer.from(newItem.payload.substr(2), "hex").toString("utf8")
       let json = JSON.parse(str)
-      if (json.owner_id && json.owner_id == user && json.rounds){
+      if (!json.rounds) {
+        return 
+      }
+      if ((json.owner_id && json.owner_id == user) || 
+      (json.opponent_id && json.opponent_id == user)){
         list.push(json)
       }
     })

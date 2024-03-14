@@ -77,6 +77,13 @@ export class FighterComponent {
       alert("Stat is over 40")
       return
     }
+
+    if (this.atk < 1 || this.spd < 1 || 
+      this.def < 1 || this.hp < 1) {
+      alert("Some stat is lower than 1")
+      return
+    }
+
     if (this.atk + this.spd + this.def + this.hp > 100) {
       alert("Sum of stats invalid")
       return
