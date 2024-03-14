@@ -14,12 +14,6 @@
 
 <button mat-flat-button color="primary" (click)="inspectUserBattles()">Refresh</button>
 <mat-list>
-<<<<<<< HEAD
-    <p mat-list-item *ngFor="let report of inspectReply">
-        Game ID: {{report.id}} - Value: {{report.amount}} - Status: {{report.status}} 
-        <button mat-flat-button color="basic" *ngIf="report.status == 'accepted'" (click)="confirmFighter(report)">Start Fight!</button>
-    </p>
-=======
     <div mat-list-item *ngFor="let report of inspectReply">
         <hr/><br/>
         Game ID: {{report.id}} - Value: {{report.amount}}<br/>
@@ -31,5 +25,4 @@
         <button mat-flat-button color="basic" *ngIf="report.status == 'accepted'" (click)="confirmFighter(report)">Start Fight!</button>
         <br/>
     </div>
->>>>>>> b5562f060aedef1f184c1cf05c4517da717a29e2
 </mat-list>
