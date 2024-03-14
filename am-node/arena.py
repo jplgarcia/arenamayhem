@@ -32,7 +32,11 @@ class Character:
             or self.HP > threshold_single
             or self.ATK > threshold_single
             or self.DEF > threshold_single
-            or self.SPD > threshold_single)
+            or self.SPD > threshold_single
+            or self.HP < 1
+            or self.ATK < 1
+            or self.DEF < 1
+            or self.SPD < 1)
 
     def is_faster_than(self, character):
         return self.SPD > character.SPD + 5

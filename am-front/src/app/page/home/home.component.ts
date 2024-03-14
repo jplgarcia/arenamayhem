@@ -60,9 +60,22 @@ export class HomeComponent {
       public dialog: MatDialog) {
 
     this.userAddress = onboardService.getConnectedWallet()
+
+    this.inspectUserBattles()
   }
 
-  createChallenge() {
+  async createChallenge() {
+
+    let erc20balance = await this.httpService.getERC20Balance(this.onboardService.getConnectedWallet(), this.ethereumService.getTokenAddres())
+    let bigBalance = ethers.BigNumber.from(erc20balance)
+    let bigWage = ethers.BigNumber.from(ethers.utils.parseEther(this.ctsiToBet.toString()).toString()).mul(2)
+    console.log(bigBalance.toString(), bigWage.toString())
+    
+    if (bigBalance.lt(bigWage)) {
+      alert ("You don't have enough balance to create this fight. To deposit more, go to assets page.\n\n"
+      + "Remember that when you create a bet you also stake the value of the wage by 2 to guarantee one won't cheat")
+      return
+    }
 
     const dialogRef = this.dialog.open(FighterComponent, {
       width: '650px',

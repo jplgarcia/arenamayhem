@@ -36,7 +36,7 @@ To customize blockchain interactions, modify the configuration in `src/app/servi
 To run the application:
 
 1. Install dependencies with `npm install`.
-2. Start the Angular development server with `ng serve`.
+2. Start the Angular development server with `ng serve` if you have [angular-cli](https://www.npmjs.com/package/@angular/cli) installed. Otherwise run it with npm start.
 3. Open `http://localhost:4200/` in your browser to view the DApp.
 
 IMPORTANT: It needs the [arena-mayhem-backend](https://github.com/jplgarcia/arenamayhem/am-node) running with sunodo to work

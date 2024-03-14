@@ -54,6 +54,17 @@ export class ChallengesComponent {
 
   async acceptBattle(report:any) {
     await this.ethereumService.initEthereum();
+
+    let erc20balance = await this.httpService.getERC20Balance(this.onboardService.getConnectedWallet(), this.ethereumService.getTokenAddres())
+    let bigBalance = ethers.BigNumber.from(erc20balance.toString())
+    let bigWage = ethers.BigNumber.from(report.amount.toString()).toString()
+    console.log(bigBalance, bigWage)
+    
+    if (bigBalance.lt(bigWage)) {
+      alert ("You don't have enough balance to accept this fight. To deposit more, go to assets page.")
+      return
+    }
+
     const dialogRef = this.dialog.open(FighterComponent, {
       width: '650px',
       data: {message: "You are accepting a challenge" , value: report.amount} // You can pass data to the dialog here
