@@ -99,7 +99,7 @@ export class HomeComponent {
     });
   }
 
-  confirmFighter(report:any) {
+  async confirmFighter(report:any) {
     let fighterStr = localStorage.getItem(report.fighter_hash)
     let fighterBuild = null
     if (fighterStr) {
@@ -116,27 +116,30 @@ export class HomeComponent {
       if (!fighter){
         return
       }
+
+      console.log(fighter)
+      console.log(report)
       
-      this.submitGenericInput(JSON.stringify({
+      await this.submitGenericInput(JSON.stringify({
         method: "start_match",
         fighter,
         challenge_id: report.id
       }))
       while(true) {
         let gqlreply = await this.graphqlService.getUserBattles(this.onboardService.getConnectedWallet())
-        let notice
+        let battleNote = null
         for (let item of gqlreply) {
-          if (item.challenge_id != report.challenge_id) {
+          if (item.game_id != report.id) {
             continue
+          } else {
+            battleNote = item    
           }
-          notice = item    
         }
-        if (notice) {
-          console.log("FOUNDDD")
-          console.log(notice)
+        if (battleNote) {
           const dialogRef = this.dialog.open(FightComponent, {
-            width: '650px',
-            data: notice // You can pass data to the dialog here
+            width: '875px',
+            height: '420px',
+            data: battleNote // You can pass data to the dialog here
           });
           break
         }
