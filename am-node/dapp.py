@@ -100,7 +100,7 @@ def handle_inspect(data):
             if (token_type == "erc20"):
                 token_address = info[2]
                 amount = wallet.balance_get(account).erc20_get(token_address.lower())
-            report = {"payload": encode({"token_id": token_id, "amount": amount, "token_type": token_type})}
+            report = {"payload": encode({"token_id": token_id, "amount": str(amount), "token_type": token_type})}
             
         elif url.path.startswith("battles"):
             battle_list = battle_manager.list_matches()

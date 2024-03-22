@@ -25,7 +25,7 @@ class BattleManager:
     def create_challenge(self, owner_id, fighter_hash, token, amount):
         balance = self.wallet.balance_get(owner_id)
         token_balance = balance.erc20_get(token)
-        if token_balance < 2* amount:
+        if int(token_balance) < 2* amount:
             raise Exception("User does not have enough balance to propose such a duel")
         
         self.wallet.erc20_transfer(owner_id, "0x0", token, amount) ## How much the user is betting
@@ -38,7 +38,7 @@ class BattleManager:
             'owner': owner_id,
             'fighter_hash': fighter_hash,
             'token': token,
-            'amount': amount,
+            'amount': str(amount),
             'status': 'pending',  # possible statuses: pending, accepted
             'opponent': None
         }
@@ -56,7 +56,7 @@ class BattleManager:
 
         balance = self.wallet.balance_get(opponent_id)
         token_balance = balance.erc20_get(challenge['token'])
-        if token_balance < challenge['amount']:
+        if token_balance < int(challenge['amount']):
             raise Exception("User does not have enough balance to propose such a duel")
         
         d = fighter
@@ -64,7 +64,7 @@ class BattleManager:
         if char2.is_cheater():
             raise Exception("Invalid fighter data")
         
-        self.wallet.erc20_transfer(opponent_id, "0x0", challenge['token'], challenge['amount']) ## How much the user is betting
+        self.wallet.erc20_transfer(opponent_id, "0x0", challenge['token'], int(challenge['amount'])) ## How much the user is betting
 
         challenge['status'] = 'accepted'
         challenge['opponent'] = opponent_id
@@ -90,7 +90,7 @@ class BattleManager:
 
         opponent_id = challenge['opponent']
         token = challenge['token']
-        amount = challenge['amount']
+        amount = int(challenge['amount'])
         if (char1.is_cheater() or not self._hash_matches_fighter(fighter, challenge['fighter_hash'])):
             ## ends duel and player 2 gets everything, even the stake
             self.challenges.pop(challenge_id)
