@@ -110,7 +110,7 @@ export class AssetsComponent {
       await this.ethereumService.initEthereum();
       await this.ethereumService.withdrawERC20(this.onboardService.getConnectedWallet(), this.sunodoWithdrawAmount);
     } catch (error) {
-      console.error('Error updating data:', error);
+      console.error('Error updating the data:', error);
     }
   }
   
@@ -119,7 +119,7 @@ export class AssetsComponent {
       await this.ethereumService.initEthereum();
       await this.ethereumService.transferERC20(this.onboardService.getConnectedWallet(), this.sunodoTransferAddress, this.sunodoTransferAmount);
     } catch (error) {
-      console.error('Error updating data:', error);
+      console.error('Error updating the data:', error);
     }
   }
 
