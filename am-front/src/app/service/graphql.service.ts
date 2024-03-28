@@ -14,7 +14,7 @@ export class GraphqlService {
 
   constructor() {
     this.client = createClient({
-      url: 'http://localhost:8080/graphql',
+      url: 'https://am-sepolia.fly.dev/graphql',
       exchanges: [ fetchExchange]
     });
   }

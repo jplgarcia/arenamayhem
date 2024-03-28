@@ -10,7 +10,7 @@ import axios from 'axios';
 })
 export class HttpService {
 
-  private dappURL = "http://localhost:8080"
+  private dappURL = "https://am-sepolia.fly.dev/"
   public balance = 0
   
   constructor() { }
