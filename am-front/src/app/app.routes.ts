@@ -6,6 +6,7 @@ import { HistoryComponent } from './page/history/history.component';
 import { AssetsComponent } from './page/assets/assets.component';
 
 export const routes: Routes = [
+    { path: '',   redirectTo: '/home', pathMatch: 'full' }, // redirect to `first-component`
     { path: 'home', component: HomeComponent },
     { path: 'challenges', component: ChallengesComponent },
     { path: 'history', component: HistoryComponent },
