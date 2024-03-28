@@ -1,12 +1,12 @@
 <button mat-flat-button color="primary" type="submit" (click)="updateBalance()">Refresh</button>
 
-<p>CTSI Token Balance: {{ erc20balance }} </p>
+<p>LINK Token Balance: {{ erc20balance }} </p>
 
 <br/>
 
 <form (submit)="submitSunodoDeposit()">
 <mat-form-field appearance="fill">
-    <mat-label>Sunodo Token Amount</mat-label>
+    <mat-label>LINK Token Amount</mat-label>
     <input matInput [(ngModel)]="sunodoDepositAmount" name="sunodoDepositAmount" type="number" required>
 </mat-form-field>
 &nbsp;
@@ -15,7 +15,7 @@
 
 <form (submit)="submitSunodoWithdraw()">
 <mat-form-field appearance="fill">
-    <mat-label>Sunodo Token</mat-label>
+    <mat-label>LINK Token</mat-label>
     <input matInput [(ngModel)]="sunodoWithdrawAmount" name="sunodoWithdrawAmount" type="number" required>
 </mat-form-field>
 &nbsp;
@@ -29,7 +29,7 @@
 </mat-form-field>
 &nbsp;
 <mat-form-field appearance="fill">
-    <mat-label>Sunodo Token</mat-label>
+    <mat-label>LINK Token</mat-label>
     <input matInput [(ngModel)]="sunodoTransferAmount" name="sunodoTransferAmount" type="number" required>
 </mat-form-field>
 &nbsp;
