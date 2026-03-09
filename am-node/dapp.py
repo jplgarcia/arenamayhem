@@ -3,8 +3,8 @@ from urllib.parse import urlparse
 import requests
 import logging
 import json
-import cartesi_wallet.wallet as Wallet
-from cartesi_wallet.util import hex_to_str, str_to_hex
+
+from wallet import Wallet, hex_to_str, str_to_hex
 from BattleManager import BattleManager
 
 logging.basicConfig(level="INFO")
@@ -15,14 +15,13 @@ if "ROLLUP_HTTP_SERVER_URL" in environ:
     rollup_server = environ["ROLLUP_HTTP_SERVER_URL"]
 logger.info(f"HTTP rollup_server url is {rollup_server}")
 
-dapp_relay_address = "0xF5DE34d6BbC0446E2a45719E718efEbaaE179daE"
-ether_portal_address = "0xFfdbe43d4c855BF7e0f105c400A50857f53AB044"
-erc20_portal_address = "0x9C21AEb2093C32DDbC53eEF24B873BDCd1aDa1DB"
-erc721_portal_address = "0x237F8DD094C0e47f4236f12b4Fa01d6Dae89fb87"
+# Cartesi Rollups v2 portal addresses (same on every chain)
+ether_portal_address  = "0xA632c5c05812c6a6149B7af5C56117d1D2603828"
+erc20_portal_address  = "0xACA6586A0Cf05bD831f2501E7B4aea550dA6562D"
+erc721_portal_address = "0x9E8851dadb2b77103928518846c4678d48b5e371"
 
-wallet = Wallet
+wallet = Wallet()
 battle_manager = BattleManager(wallet)
-rollup_address = ""
 
 def encode(d):
     return "0x" + json.dumps(d).encode("utf-8").hex()
@@ -35,86 +34,169 @@ def decode_json(b):
 def handle_advance(data):
     logger.info(f"Received advance request data {data}")
     msg_sender = data["metadata"]["msg_sender"]
-    payload = data["payload"]
-    print(payload)
-        
+    payload    = data["payload"]
+
+    # ------------------------------------------------------------------ #
+    # Portal deposits                                                       #
+    # ------------------------------------------------------------------ #
     try:
-        notice = None
         if msg_sender.lower() == erc20_portal_address.lower():
-            notice = wallet.erc20_deposit_process(payload)
-            response = requests.post(rollup_server + "/notice", json={"payload": notice.payload})
-        if notice:
-            logger.info(f"Received notice status {response.status_code} body {response.content}")
+            notice_payload = wallet.erc20_deposit_process(payload)
+            response = requests.post(rollup_server + "/notice", json={"payload": notice_payload})
+            logger.info(f"ERC20 deposit notice status {response.status_code}")
             return "accept"
+
+        if msg_sender.lower() == ether_portal_address.lower():
+            notice_payload = wallet.ether_deposit_process(payload)
+            response = requests.post(rollup_server + "/notice", json={"payload": notice_payload})
+            logger.info(f"Ether deposit notice status {response.status_code}")
+            return "accept"
+
+        if msg_sender.lower() == erc721_portal_address.lower():
+            notice_payload = wallet.erc721_deposit_process(payload)
+            response = requests.post(rollup_server + "/notice", json={"payload": notice_payload})
+            logger.info(f"ERC721 deposit notice status {response.status_code}")
+            return "accept"
+
     except Exception as error:
-        error_msg = f"Failed to process command '{payload}'. {error}"
-        response = requests.post(rollup_server + "/report", json={"payload": encode(error_msg)})
+        error_msg = f"Failed to process deposit '{payload}'. {error}"
+        requests.post(rollup_server + "/report", json={"payload": encode(error_msg)})
         logger.debug(error_msg, exc_info=True)
         return "reject"
-        
+
+    # ------------------------------------------------------------------ #
+    # Application methods                                                  #
+    # ------------------------------------------------------------------ #
     try:
         req_json = decode_json(payload)
-        print(req_json)
+        logger.info(f"Decoded request: {req_json}")
 
-        if req_json["method"] == "erc20_transfer" and msg_sender.lower() == req_json["from"].lower():
-            converted_value = int(req_json["amount"]) if isinstance(req_json["amount"], str) and req_json["amount"].isdigit() else req_json["amount"]
-            notice = wallet.erc20_transfer(req_json["from"].lower(), req_json["to"].lower(), req_json["erc20"].lower(), converted_value)
-            response = requests.post(rollup_server + "/notice", json={"payload": notice.payload})
+        method = req_json.get("method")
 
-        if req_json["method"] == "erc20_withdraw" and msg_sender.lower() == req_json["from"].lower():
-            converted_value = int(req_json["amount"]) if isinstance(req_json["amount"], str) and req_json["amount"].isdigit() else req_json["amount"]
-            voucher = wallet.erc20_withdraw(req_json["from"].lower(), req_json["erc20"].lower(), converted_value)
-            response = requests.post(rollup_server + "/voucher", json={"payload": voucher.payload, "destination": voucher.destination})
+        if method == "ether_transfer" and msg_sender.lower() == req_json["from"].lower():
+            amount = int(req_json["amount"])
+            notice_payload = wallet.ether_transfer(
+                req_json["from"].lower(),
+                req_json["to"].lower(),
+                amount,
+            )
+            response = requests.post(rollup_server + "/notice", json={"payload": notice_payload})
 
-        if req_json["method"] == "create_challenge":
-            converted_value = int(req_json["amount"]) if isinstance(req_json["amount"], str) and req_json["amount"].isdigit() else req_json["amount"]
-            payload = battle_manager.create_challenge(msg_sender.lower(), req_json["fighter_hash"], req_json["token"].lower(), converted_value)
-            response = requests.post(rollup_server + "/notice", json={"payload": str_to_hex(json.dumps(payload))})
+        elif method == "ether_withdraw" and msg_sender.lower() == req_json["from"].lower():
+            amount = int(req_json["amount"])
+            destination, voucher_payload = wallet.ether_withdraw(
+                req_json["from"].lower(),
+                amount,
+            )
+            response = requests.post(
+                rollup_server + "/voucher",
+                json={"payload": voucher_payload, "destination": destination},
+            )
 
-        if req_json["method"] == "accept_challenge":
-            payload = battle_manager.accept_challenge(req_json["challenge_id"], msg_sender.lower(), req_json["fighter"])
-            response = requests.post(rollup_server + "/notice", json={"payload": str_to_hex(json.dumps(payload))})
+        elif method == "erc20_transfer" and msg_sender.lower() == req_json["from"].lower():
+            amount = int(req_json["amount"])
+            notice_payload = wallet.erc20_transfer(
+                req_json["from"].lower(),
+                req_json["to"].lower(),
+                req_json["erc20"].lower(),
+                amount,
+            )
+            response = requests.post(rollup_server + "/notice", json={"payload": notice_payload})
 
-        if req_json["method"] == "start_match":
-            notice_payload, report_payload = battle_manager.start_match(req_json["challenge_id"], msg_sender.lower(), req_json["fighter"])
-            response = requests.post(rollup_server + "/report", json={"payload": str_to_hex(json.dumps(report_payload))})
-            response = requests.post(rollup_server + "/notice", json={"payload": str_to_hex(json.dumps(notice_payload))})
+        elif method == "erc20_withdraw" and msg_sender.lower() == req_json["from"].lower():
+            amount = int(req_json["amount"])
+            destination, voucher_payload = wallet.erc20_withdraw(
+                req_json["from"].lower(),
+                req_json["erc20"].lower(),
+                amount,
+            )
+            response = requests.post(
+                rollup_server + "/voucher",
+                json={"payload": voucher_payload, "destination": destination},
+            )
 
-        return "accept" 
+        elif method == "create_challenge":
+            amount = int(req_json["amount"])
+            result = battle_manager.create_challenge(
+                msg_sender.lower(),
+                req_json["fighter_hash"],
+                req_json["token"].lower(),
+                amount,
+            )
+            response = requests.post(
+                rollup_server + "/notice",
+                json={"payload": str_to_hex(json.dumps(result))},
+            )
+
+        elif method == "accept_challenge":
+            result = battle_manager.accept_challenge(
+                req_json["challenge_id"],
+                msg_sender.lower(),
+                req_json["fighter"],
+            )
+            response = requests.post(
+                rollup_server + "/notice",
+                json={"payload": str_to_hex(json.dumps(result))},
+            )
+
+        elif method == "start_match":
+            notice_data, report_data = battle_manager.start_match(
+                req_json["challenge_id"],
+                msg_sender.lower(),
+                req_json["fighter"],
+            )
+            requests.post(rollup_server + "/report",  json={"payload": str_to_hex(json.dumps(report_data))})
+            requests.post(rollup_server + "/notice", json={"payload": str_to_hex(json.dumps(notice_data))})
+
+        else:
+            logger.warning(f"Unknown method: {method}")
+
+        return "accept"
+
     except Exception as error:
         error_msg = f"Failed to process command '{payload}'. {error}"
-        response = requests.post(rollup_server + "/report", json={"payload": encode(error_msg)})
+        requests.post(rollup_server + "/report", json={"payload": encode(error_msg)})
         logger.debug(error_msg, exc_info=True)
         return "reject"
             
 
 def handle_inspect(data):
     logger.info(f"Received inspect request data {data}")
-    report = {}
     try:
         url = urlparse(hex_to_str(data["payload"]))
+
         if url.path.startswith("balance/"):
             info = url.path.replace("balance/", "").split("/")
             token_type, account = info[0].lower(), info[1].lower()
             token_address, token_id, amount = "", 0, 0
-            if (token_type == "erc20"):
+
+            if token_type == "erc20":
                 token_address = info[2]
                 amount = wallet.balance_get(account).erc20_get(token_address.lower())
+            elif token_type == "ether":
+                amount = wallet.balance_get(account).ether_get()
+            elif token_type == "erc721":
+                token_address = info[2]
+                token_id = int(info[3]) if len(info) > 3 else 0
+                owned = wallet.balance_get(account).erc721_get(token_address.lower())
+                amount = 1 if token_id in owned else 0
+
             report = {"payload": encode({"token_id": token_id, "amount": str(amount), "token_type": token_type})}
-            
+
         elif url.path.startswith("battles"):
-            battle_list = battle_manager.list_matches()
-            report = {"payload": encode(battle_list)}
-            
+            report = {"payload": encode(battle_manager.list_matches())}
+
         elif url.path.startswith("user_battles"):
             user = url.path.replace("user_battles/", "")
-            battle_list = battle_manager.list_user_matches(user)
-            report = {"payload": encode(battle_list)}
-            
-        response = requests.post(rollup_server + "/report", json=report)
-        logger.info(f"Received report status {response.status_code} body {response.content}")
+            report = {"payload": encode(battle_manager.list_user_matches(user))}
 
+        else:
+            report = {"payload": encode({"error": f"Unknown inspect route: {url.path}"})}
+
+        response = requests.post(rollup_server + "/report", json=report)
+        logger.info(f"Received report status {response.status_code}")
         return "accept"
+
     except Exception as error:
         error_msg = f"Failed to process inspect request. {error}"
         logger.debug(error_msg, exc_info=True)

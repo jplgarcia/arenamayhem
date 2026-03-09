@@ -15,8 +15,6 @@ import { GraphqlService } from '../../service/graphql.service';
 import { VoucherComponent } from '../../dialog/voucher/voucher.component';
 import { SHA256, enc } from 'crypto-js';
 import { FighterComponent } from '../../dialog/fighter/fighter.component';
-import { ethers } from 'ethers';
-import { gql } from 'urql';
 import { FightComponent } from '../../dialog/fight/fight.component';
 
 @Component({

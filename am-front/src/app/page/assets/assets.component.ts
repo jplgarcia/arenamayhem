@@ -64,10 +64,7 @@ export class AssetsComponent {
     this.etherbalance = await this.httpService.getEtherBalance(this.onboardService.getConnectedWallet())
   }
 
-  async submitRelay() {
-    await this.ethereumService.initEthereum();
-    await this.ethereumService.updateRelay();
-  }
+  // submitRelay() removed - DAppAddressRelay is no longer needed in Cartesi Rollups v2
 
   async submitEtherDeposit(): Promise<void> {
     try {

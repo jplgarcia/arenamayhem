@@ -1,9 +1,26 @@
 // src/app/ethereum.service.ts
+// Updated for Cartesi Rollups v2 using viem + @cartesi/viem
 
 import { Injectable } from '@angular/core';
-import { ethers } from 'ethers';
+import {
+  createWalletClient,
+  createPublicClient,
+  custom,
+  parseEther,
+  toHex,
+  type Address,
+  type PublicClient
+} from 'viem';
+import { sepolia, anvil, type Chain } from 'viem/chains';
+import { walletActionsL1 } from '@cartesi/viem';
+import {
+  erc20PortalAddress,
+  erc721PortalAddress,
+  ierc20Abi,
+  ierc721Abi
+} from '@cartesi/viem/abi';
 import { OnboardService } from './onboard.service';
-import * as  abi from '../ABI/abi'
+import { environment } from '../../environments/environment';
 
 declare global {
   interface Window {
@@ -15,229 +32,215 @@ declare global {
   providedIn: 'root'
 })
 export class EthereumService {
-  private provider: ethers.providers.Web3Provider | null = null;
-  private signer: ethers.Signer | null = null;
+  private walletClient: any = null;
+  private publicClient: PublicClient | null = null;
 
-  private dappContract: ethers.Contract | null = null;
-  private dappRelayContract: ethers.Contract | null = null;
-  private inputContract: ethers.Contract | null = null;
-  private etherPortalContract: ethers.Contract | null = null;
-  private ERC20PortalContract: ethers.Contract | null = null;
-  private ERC721PortalContract: ethers.Contract | null = null;
-  private erc20TokenContract: ethers.Contract | null = null;
-
-  private dappAddress = '0x47fe47fF789bF20e7288Be73301DA92c74A8D487'
-  private dappRelayAddress = "0xF5DE34d6BbC0446E2a45719E718efEbaaE179daE"
-  private inputAddress = '0x59b22D57D4f067708AB0c00552767405926dc768'
-  private etherPortalAddress = '0xFfdbe43d4c855BF7e0f105c400A50857f53AB044'
-  private erc20PortalAddress = '0x9C21AEb2093C32DDbC53eEF24B873BDCd1aDa1DB'
-  private erc721PortalAddress = '0x237F8DD094C0e47f4236f12b4Fa01d6Dae89fb87'
-
-  private erc20TokenAddress = '0x779877A7B0D9E8603169DdbD7836e478b4624789'
+  private dappAddress: Address = environment.dappAddress as Address;
+  private erc20TokenAddress: Address = environment.erc20TokenAddress as Address;
 
   constructor(private onboardService: OnboardService) {}
 
   getTokenAddres() {
-    return this.erc20TokenAddress
+    return this.erc20TokenAddress;
   }
 
   async initEthereum(): Promise<void> {
     if (!this.onboardService.isWalletConnected()) {
       await this.onboardService.connectWallet();
     }
-    this.provider = new ethers.providers.Web3Provider(window.ethereum);
-    this.signer = this.provider.getSigner();
 
-    this.dappContract = new ethers.Contract(this.dappAddress, abi.dappContractABI, this.signer);
-    this.dappRelayContract = new ethers.Contract(this.dappRelayAddress, abi.dappAddressRelayContractABI, this.signer);
-    this.inputContract = new ethers.Contract(this.inputAddress, abi.inputContractABI, this.signer);
-    this.erc20TokenContract = new ethers.Contract(this.erc20TokenAddress, abi.genericERC20ContractABI, this.signer);
-    this.etherPortalContract = new ethers.Contract(this.etherPortalAddress, abi.etherPortalContractABI, this.signer);
-    this.ERC20PortalContract = new ethers.Contract(this.erc20PortalAddress, abi.erc20PortalsContractABI, this.signer);
-    this.ERC721PortalContract = new ethers.Contract(this.erc721PortalAddress, abi.erc721PortalContractABI, this.signer);
+    const chain: Chain = environment.chainId === 31337 ? anvil : sepolia;
 
+    this.walletClient = createWalletClient({
+      chain,
+      transport: custom(window.ethereum)
+    }).extend(walletActionsL1());
+
+    this.publicClient = createPublicClient({
+      chain,
+      transport: custom(window.ethereum)
+    });
   }
 
-  async updateRelay () {
-    if (!this.dappRelayContract) {
-      throw new Error('Portal Contract not initialized');
-    }
-    await this.dappRelayContract['relayDAppAddress'](this.dappAddress);
+  private async getAccount(): Promise<Address> {
+    const addresses = await this.walletClient.getAddresses();
+    return addresses[0];
   }
+
+  // -------------------------------------------------------------------
+  // Asset deposits (L1 -> Cartesi application)
+  // -------------------------------------------------------------------
 
   async depositEtherAssets(amount: Number): Promise<void> {
-    if (!this.etherPortalContract) {
-      throw new Error('Portal Contract not initialized');
-    }
-
-    const parsedAmount = ethers.utils.parseEther(`${amount}`)
-    const data = ethers.utils.toUtf8Bytes(`Deposited (${amount}) ether.`);
-    const txOverrides = {value: parsedAmount}
-
-    const transaction = await this.etherPortalContract['depositEther'](this.dappAddress, data, txOverrides);
-    await transaction.wait(1);
+    if (!this.walletClient) throw new Error('Wallet not initialized');
+    const account = await this.getAccount();
+    const tx = await this.walletClient.depositEther({
+      account,
+      application: this.dappAddress,
+      value: parseEther(`${amount}`),
+      execLayerData: '0x'
+    });
+    console.log('depositEther tx:', tx);
   }
 
   async depositERC20Assets(amount: Number): Promise<void> {
-    if (!this.ERC20PortalContract) {
-      throw new Error('Portal Contract not initialized');
+    if (!this.walletClient || !this.publicClient) throw new Error('Wallet not initialized');
+    const account = await this.getAccount();
+    const parsedAmount = parseEther(`${amount}`);
+
+    const allowance = await this.publicClient.readContract({
+      address: this.erc20TokenAddress,
+      abi: ierc20Abi,
+      functionName: 'allowance',
+      args: [account, erc20PortalAddress]
+    }) as bigint;
+
+    if (allowance < parsedAmount) {
+      await this.walletClient.writeContract({
+        account,
+        address: this.erc20TokenAddress,
+        abi: ierc20Abi,
+        functionName: 'approve',
+        args: [erc20PortalAddress, parsedAmount]
+      });
     }
 
-    if (!this.erc20TokenContract) {
-      throw new Error('Token Contract not initialized');
-    }
-
-    const allowance = await this.erc20TokenContract['allowance'](this.signer?.getAddress(), this.erc20PortalAddress);
-    const parsedAmount = ethers.utils.parseEther(`${amount}`)
-    
-    if (parsedAmount > allowance){
-      const increaseAllowanceTx = await this.erc20TokenContract['approve'](this.erc20PortalAddress, parsedAmount);
-      let receipt = await increaseAllowanceTx.wait(1);
-
-      const event = (await this.erc20TokenContract.queryFilter(this.erc20TokenContract.filters['Approval'](), receipt.blockHash)).pop();
-      if (!event) {
-          throw Error(`could not approve ${amount} tokens for DAppERC20Portal(${this.erc20PortalAddress})  (signer: ${this.signer?.getAddress()}, tx: ${increaseAllowanceTx.hash})`);
-      }
-    }
-
-    const data = ethers.utils.toUtf8Bytes(`Deposited (${amount}) of ERC20 (${this.erc20TokenAddress}).`);
-    const transaction = await this.ERC20PortalContract['depositERC20Tokens'](this.erc20TokenAddress, this.dappAddress, parsedAmount, data);
-    await transaction.wait(1);
+    const tx = await this.walletClient.depositERC20Tokens({
+      account,
+      application: this.dappAddress,
+      token: this.erc20TokenAddress,
+      amount: parsedAmount,
+      execLayerData: '0x'
+    });
+    console.log('depositERC20Tokens tx:', tx);
   }
 
-  async depositERC721Assets(tokenAddress: string, tokenId:Number): Promise<void> {
-    if (!this.ERC721PortalContract) {
-      throw new Error('Portal Contract not initialized');
+  async depositERC721Assets(tokenAddress: string, tokenId: Number): Promise<void> {
+    if (!this.walletClient || !this.publicClient) throw new Error('Wallet not initialized');
+    const account = await this.getAccount();
+    const tokenAddr = tokenAddress as Address;
+    const tokenIdBI = BigInt(tokenId as number);
+
+    const currentApproval = await this.publicClient.readContract({
+      address: tokenAddr,
+      abi: ierc721Abi,
+      functionName: 'getApproved',
+      args: [tokenIdBI]
+    });
+
+    if (currentApproval !== erc721PortalAddress) {
+      await this.walletClient.writeContract({
+        account,
+        address: tokenAddr,
+        abi: ierc721Abi,
+        functionName: 'approve',
+        args: [erc721PortalAddress, tokenIdBI]
+      });
     }
 
-    if (!this.signer) {
-      throw new Error('Signer not initialized');
-    }
-    const data = ethers.utils.toUtf8Bytes(`Deposited (${tokenId}) of ERC721 (${tokenAddress}).`);
-    let ERC721TokenContract = new ethers.Contract(tokenAddress, abi.genericERC721ContractABI, this.signer);
-
-    // query current approval
-    const currentApproval = await ERC721TokenContract['getApproved'](tokenId);
-    if (currentApproval !== this.erc721PortalAddress) {
-        const tx = await ERC721TokenContract['approve'](this.erc721PortalAddress, tokenId);
-        const receipt = await tx.wait(1);
-        const event = (await ERC721TokenContract.queryFilter(ERC721TokenContract.filters['Approval'](), receipt.blockHash)).pop();
-        if (!event) {
-            throw Error(`could not approve ${tokenId} for DAppERC721Portal(${this.erc721PortalAddress})  (signer: ${this.signer.getAddress()}, tx: ${tx.hash})`);
-        }
-    }
-
-    // Transfer
-    const transaction =     this.ERC721PortalContract['depositERC721Token'](tokenAddress, this.dappAddress, tokenId, "0x", data);
-    await transaction.wait(1);
+    const tx = await this.walletClient.depositERC721Token({
+      account,
+      application: this.dappAddress,
+      token: tokenAddr,
+      tokenId: tokenIdBI,
+      baseLayerData: '0x',
+      execLayerData: '0x'
+    });
+    console.log('depositERC721Token tx:', tx);
   }
+
+  // -------------------------------------------------------------------
+  // Generic application input
+  // -------------------------------------------------------------------
+
+  async genericCall(str: string) {
+    if (!this.walletClient) throw new Error('Wallet not initialized');
+    const account = await this.getAccount();
+    try {
+      const tx = await this.walletClient.addInput({
+        account,
+        application: this.dappAddress,
+        payload: toHex(str)
+      });
+      console.log('addInput tx:', tx);
+    } catch (e) {
+      console.log(`${e}`);
+    }
+  }
+
+  // -------------------------------------------------------------------
+  // In-app transfers / withdrawals (sent as inputs to the application)
+  // -------------------------------------------------------------------
 
   async transferEther(from: String, to: String, amount: Number) {
-    let obj = {
-      "method": "ether_transfer",
-      "from" : from,
-      "to": to,
-      "amount": ethers.utils.parseEther(`${amount}`).toString()
-    }
-
-    await this.genericCall(JSON.stringify(obj))
+    await this.genericCall(JSON.stringify({
+      method: 'ether_transfer',
+      from, to,
+      amount: parseEther(`${amount}`).toString()
+    }));
   }
 
   async transferERC20(from: String, to: String, amount: Number) {
-    let obj = {
-      "method": "erc20_transfer",
-      "from" : from,
-      "to": to,
-      "erc20": this.erc20TokenAddress,
-      "amount": ethers.utils.parseEther(`${amount}`).toString()
-    }
-
-    await this.genericCall(JSON.stringify(obj))
+    await this.genericCall(JSON.stringify({
+      method: 'erc20_transfer',
+      from, to,
+      erc20: this.erc20TokenAddress,
+      amount: parseEther(`${amount}`).toString()
+    }));
   }
 
   async transferERC721(from: String, to: String, tokenAddress: string, tokenId: Number) {
-    let obj = {
-      "method": "erc721_transfer",
-      "from" : from,
-      "to": to,
-      "erc721": tokenAddress,
-      "token_id": tokenId
-    }
-
-    await this.genericCall(JSON.stringify(obj))
+    await this.genericCall(JSON.stringify({
+      method: 'erc721_transfer',
+      from, to,
+      erc721: tokenAddress,
+      token_id: tokenId
+    }));
   }
 
   async withdrawEther(from: String, amount: Number) {
-    let obj = {
-      "method": "ether_withdraw",
-      "from" : from,
-      "amount": ethers.utils.parseEther(`${amount}`).toString()
-    }
-
-    await this.genericCall(JSON.stringify(obj))
+    await this.genericCall(JSON.stringify({
+      method: 'ether_withdraw',
+      from,
+      amount: parseEther(`${amount}`).toString()
+    }));
   }
 
   async withdrawERC20(from: String, amount: Number) {
-    let obj = {
-      "method": "erc20_withdraw",
-      "from" : from,
-      "erc20": this.erc20TokenAddress,
-      "amount": ethers.utils.parseEther(`${amount}`).toString()
-    }
-
-    await this.genericCall(JSON.stringify(obj))
+    await this.genericCall(JSON.stringify({
+      method: 'erc20_withdraw',
+      from,
+      erc20: this.erc20TokenAddress,
+      amount: parseEther(`${amount}`).toString()
+    }));
   }
 
   async withdrawERC721(from: String, tokenAddress: String, tokenId: Number) {
-    let obj = {
-      "method": "erc721_withdraw",
-      "from" : from,
-      "erc721": tokenAddress,
-      "amount": tokenId
-    }
-
-    await this.genericCall(JSON.stringify(obj))
+    await this.genericCall(JSON.stringify({
+      method: 'erc721_withdraw',
+      from,
+      erc721: tokenAddress,
+      amount: tokenId
+    }));
   }
 
-  async genericCall(str: string) {
-    if (!this.inputContract) {
-      throw new Error('Token Contract not initialized');
-    }
+  // -------------------------------------------------------------------
+  // Voucher execution (L1 on-chain settlement)
+  // In v2 pass the full Output object from @cartesi/rpc - proof is embedded.
+  // wasVoucherExecuted is handled by GraphqlService (checks execution_transaction_hash).
+  // -------------------------------------------------------------------
 
+  async voucherExecuteCall(output: any) {
+    if (!this.walletClient) throw new Error('Wallet not initialized');
+    const account = await this.getAccount();
     try {
-        let payload = ethers.utils.toUtf8Bytes(str);
-        console.log(payload)
-        await this.inputContract['addInput'](this.dappAddress, payload);
+      await this.walletClient.executeOutput({
+        account,
+        application: this.dappAddress,
+        output
+      });
     } catch (e) {
-        console.log(`${e}`);
+      console.log(`${e}`);
     }
-  
   }
-
-  async wasVoucherExecuted(inputIndex: Number, index: Number) {
-    if (!this.dappContract) {
-      throw new Error('Token Contract not initialized');
-    }
-    let executed = true
-    try {
-        executed = await this.dappContract['wasVoucherExecuted'](inputIndex, index);
-    } catch (e) {
-        console.log(`${e}`);
-    }
-    return executed
-  }
-
-  async voucherExecuteCall(destination:string, payload:string, proof:any) {
-    if (!this.dappContract) {
-      throw new Error('Token Contract not initialized');
-    }
-    let executed = true
-    try {
-        await this.dappContract['executeVoucher'](destination, payload, proof);
-    } catch (e) {
-        console.log(`${e}`);
-    }
-    return executed
-  }
-  // Add more Ethereum interaction methods as needed
 }

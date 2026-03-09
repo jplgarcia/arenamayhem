@@ -1,0 +1,12 @@
+{
+  "/rpc": {
+    "target": "http://127.0.0.1:6751",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/inspect": {
+    "target": "http://127.0.0.1:6751",
+    "secure": false,
+    "changeOrigin": true
+  }
+}

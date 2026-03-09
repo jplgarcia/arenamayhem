@@ -1,6 +1,5 @@
 import json
-import cartesi_wallet.wallet as Wallet
-from cartesi_wallet.outputs import Notice, Log
+from wallet import Wallet
 import arena
 import hashlib
 

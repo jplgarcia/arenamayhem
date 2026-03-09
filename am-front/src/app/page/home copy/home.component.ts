@@ -60,10 +60,7 @@ export class HomeComponent {
     console.log(this.inspectReply)
   }
 
-  async submitRelay() {
-    await this.ethereumService.initEthereum();
-    await this.ethereumService.updateRelay();
-  }
+  // updateRelay() removed - DAppAddressRelay is no longer needed in Cartesi Rollups v2
 
   async submitGenericInput() {
     await this.ethereumService.initEthereum();

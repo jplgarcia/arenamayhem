@@ -1,16 +1,43 @@
-# syntax=docker.io/docker/dockerfile:1.4
-FROM --platform=linux/riscv64 cartesi/python:3.10-slim-jammy
+# syntax=docker.io/docker/dockerfile:1
 
-LABEL io.sunodo.sdk_version=0.3.0
-LABEL io.cartesi.rollups.ram_size=128Mi
+ARG APT_UPDATE_SNAPSHOT=20250915T030400Z
+ARG MACHINE_GUEST_TOOLS_VERSION=0.17.2
+ARG MACHINE_GUEST_TOOLS_SHA256SUM=c077573dbcf0cdc146adf14b480bfe454ca63aa4d3e8408c5487f550a5b77a41
 
-ARG MACHINE_EMULATOR_TOOLS_VERSION=0.12.0
+################################################################################
+# riscv64 base stage
+FROM --platform=linux/riscv64 cartesi/python:3.13.2-slim-noble AS base
+
+ARG APT_UPDATE_SNAPSHOT
+ARG DEBIAN_FRONTEND=noninteractive
 RUN <<EOF
+set -eu
 apt-get update
-apt-get install -y --no-install-recommends build-essential=12.9ubuntu3 busybox-static=1:1.30.1-7ubuntu3 ca-certificates=20230311ubuntu0.22.04.1 curl=7.81.0-1ubuntu1.15
-curl -fsSL https://github.com/cartesi/machine-emulator-tools/releases/download/v${MACHINE_EMULATOR_TOOLS_VERSION}/machine-emulator-tools-v${MACHINE_EMULATOR_TOOLS_VERSION}.tar.gz \
-  | tar -C / --overwrite -xvzf -
-rm -rf /var/lib/apt/lists/*
+apt-get install -y --no-install-recommends ca-certificates
+apt-get update --snapshot=${APT_UPDATE_SNAPSHOT}
+apt-get remove -y --purge ca-certificates
+apt-get autoremove -y --purge
+EOF
+
+################################################################################
+# runtime stage
+FROM base
+
+ARG MACHINE_GUEST_TOOLS_VERSION
+ARG MACHINE_GUEST_TOOLS_SHA256SUM
+ADD --checksum=sha256:${MACHINE_GUEST_TOOLS_SHA256SUM} \
+  https://github.com/cartesi/machine-guest-tools/releases/download/v${MACHINE_GUEST_TOOLS_VERSION}/machine-guest-tools_riscv64.deb \
+  /tmp/machine-guest-tools_riscv64.deb
+
+ARG DEBIAN_FRONTEND=noninteractive
+RUN <<EOF
+set -e
+apt-get install -y --no-install-recommends \
+  busybox-static \
+  /tmp/machine-guest-tools_riscv64.deb
+
+rm /tmp/machine-guest-tools_riscv64.deb
+rm -rf /var/lib/apt/lists/* /var/log/* /var/cache/*
 EOF
 
 ENV PATH="/opt/cartesi/bin:${PATH}"
@@ -19,11 +46,12 @@ WORKDIR /opt/cartesi/dapp
 COPY ./requirements.txt .
 
 RUN <<EOF
+set -e
 pip install -r requirements.txt --no-cache
 find /usr/local/lib -type d -name __pycache__ -exec rm -r {} +
 EOF
 
-COPY ./dapp.py ./arena.py ./BattleManager.py .
+COPY ./dapp.py ./arena.py ./BattleManager.py ./wallet.py .
 
 ENV ROLLUP_HTTP_SERVER_URL="http://127.0.0.1:5004"
 
