@@ -52,8 +52,8 @@ export default function HistoryPage() {
       <div className="bg-[#14110f] border-2 border-stone-800 shadow-2xl overflow-hidden">
         {battles.map((b) => (
           <div key={b.game_id}
-            className="flex items-center justify-between px-8 py-5 border-b border-stone-800 last:border-b-0 hover:bg-stone-800/20 transition-colors group">
-            <div className="flex items-center gap-8">
+            className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-5 sm:px-8 py-4 sm:py-5 gap-3 border-b border-stone-800 last:border-b-0 hover:bg-stone-800/20 transition-colors group">
+            <div className="flex items-center gap-4 sm:gap-8">
               <div className="w-10 h-10 bg-stone-900 border border-stone-700 flex items-center justify-center text-stone-500 font-mono text-xs shrink-0">
                 #{b.game_id}
               </div>
@@ -71,7 +71,7 @@ export default function HistoryPage() {
               </div>
             </div>
             <button onClick={() => setViewing(b)}
-              className="px-5 py-2 bg-stone-900 hover:bg-amber-900 text-stone-400 hover:text-amber-100 border border-stone-700 font-bold uppercase tracking-widest text-xs transition-all">
+              className="self-start sm:self-auto px-5 py-2 bg-stone-900 hover:bg-amber-900 text-stone-400 hover:text-amber-100 border border-stone-700 font-bold uppercase tracking-widest text-xs transition-all">
               Watch Replay
             </button>
           </div>

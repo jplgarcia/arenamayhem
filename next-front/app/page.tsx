@@ -122,10 +122,10 @@ export default function HomePage() {
 
       {/* Create challenge form */}
       <form onSubmit={handleCreateChallenge}
-        className="bg-[#14110f] border-2 border-stone-800 p-8 shadow-xl relative overflow-hidden">
+        className="bg-[#14110f] border-2 border-stone-800 p-5 sm:p-8 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-px h-full bg-gradient-to-b from-transparent via-amber-900/30 to-transparent" />
         <h3 className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest text-amber-700 mb-5"><Sword size={14} /> Forge a Challenge</h3>
-        <div className="flex items-end gap-4">
+        <div className="flex flex-wrap items-end gap-4">
           <label className="flex flex-col gap-1.5">
             <span className="text-[10px] text-stone-500 uppercase font-bold tracking-widest">Wager (tokens)</span>
             <input
@@ -155,10 +155,10 @@ export default function HomePage() {
       <div className="grid gap-5">
         {battles.map((b: any) => (
           <div key={b.id}
-            className="bg-[#14110f] border-2 border-stone-800 p-7 flex items-center justify-between group hover:border-amber-900/40 transition-all shadow-xl">
-            <div className="flex items-center gap-7">
-              <div className="w-14 h-14 bg-stone-900 border-2 border-stone-800 flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform shrink-0">
-                <Shield size={28} className="text-amber-900/60 group-hover:text-amber-700 transition-colors" />
+            className="bg-[#14110f] border-2 border-stone-800 p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 group hover:border-amber-900/40 transition-all shadow-xl">
+            <div className="flex items-center gap-4 sm:gap-7">
+              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-stone-900 border-2 border-stone-800 flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform shrink-0">
+                <Shield size={24} className="text-amber-900/60 group-hover:text-amber-700 transition-colors" />
               </div>
               <div>
                 <p className="font-mono text-xs text-stone-600 mb-1"># {b.id}</p>
@@ -174,7 +174,7 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="flex items-center gap-6">
+            <div className="flex items-center justify-between sm:justify-end gap-4 sm:gap-6">
               <span className={`text-xs font-bold uppercase tracking-widest italic ${
                 b.status === 'accepted' ? 'text-amber-500' :
                 b.status === 'finished' ? 'text-green-700' : 'text-stone-600'
@@ -185,12 +185,12 @@ export default function HomePage() {
 
               {b.status === 'accepted' ? (
                 <button onClick={() => handleStartFight(b)}
-                  className="px-6 py-2.5 bg-amber-900 hover:bg-amber-800 text-amber-100 border-b-4 border-amber-950 font-bold uppercase text-xs transition-all shadow-lg active:border-b-0 active:translate-y-0.5">
+                  className="px-5 py-2.5 bg-amber-900 hover:bg-amber-800 text-amber-100 border-b-4 border-amber-950 font-bold uppercase text-xs transition-all shadow-lg active:border-b-0 active:translate-y-0.5">
                   Commence
                 </button>
               ) : (
                 <button disabled
-                  className="px-6 py-2.5 bg-stone-900 text-stone-600 border border-stone-800 font-bold uppercase text-xs cursor-not-allowed">
+                  className="px-5 py-2.5 bg-stone-900 text-stone-600 border border-stone-800 font-bold uppercase text-xs cursor-not-allowed">
                   Commence
                 </button>
               )}

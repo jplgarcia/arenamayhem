@@ -70,12 +70,12 @@ export default function FighterModal({ message, value, initial, locked = false, 
   const selectedElem = ELEMENTS.find((el) => el.id === element);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 overflow-y-auto py-6">
-      <div className="bg-[#14110f] border-2 border-stone-800 p-8 w-full max-w-lg shadow-2xl relative overflow-hidden mx-4">
+    <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center bg-black/85 overflow-y-auto py-4 sm:py-6">
+      <div className="bg-[#14110f] border-2 border-stone-800 p-5 sm:p-8 w-full max-w-lg shadow-2xl relative overflow-hidden mx-4">
         <div className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-amber-900" />
         <div className="absolute bottom-0 right-0 w-10 h-10 border-b-2 border-r-2 border-amber-900" />
 
-        <h2 className="text-amber-600 text-xl font-black uppercase italic tracking-wider mb-1">{message}</h2>
+        <h2 className="text-amber-600 text-lg sm:text-xl font-black uppercase italic tracking-wide sm:tracking-wider mb-1 leading-tight">{message}</h2>
         {value !== undefined && (
           <p className="text-stone-500 text-xs mb-5 uppercase tracking-widest">Wager: {value} tokens</p>
         )}

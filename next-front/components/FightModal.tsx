@@ -4,6 +4,8 @@ import { useEffect, useRef, useCallback } from 'react';
 import type { BattleRecord } from '@/lib/rpc';
 import { Sword } from 'lucide-react';
 
+const ARENA_W = 625;
+
 interface Props {
   battle: BattleRecord;
   onClose: () => void;
@@ -14,8 +16,24 @@ interface Props {
  * fight.js is loaded globally in layout.tsx via <Script>.
  */
 export default function FightModal({ battle, onClose }: Props) {
-  const battleRef = useRef(battle);
-  battleRef.current = battle;
+  const battleRef    = useRef(battle);
+  const arenaWrapRef = useRef<HTMLDivElement>(null);
+  battleRef.current  = battle;
+
+  // Scale arena to fit available width on any screen size
+  useEffect(() => {
+    const el = arenaWrapRef.current;
+    if (!el) return;
+    const obs = new ResizeObserver(() => {
+      const scale  = Math.min(1, el.clientWidth / ARENA_W);
+      const offset = (el.clientWidth - ARENA_W * scale) / 2;
+      el.style.setProperty('--arena-scale',  String(scale));
+      el.style.setProperty('--arena-offset', `${offset}px`);
+      el.style.height = `${280 * scale}px`;
+    });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
 
   const startAnim = useCallback(() => {
     const w = window as any;
@@ -48,23 +66,33 @@ export default function FightModal({ battle, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90">
-      <div className="bg-[#14110f] border-2 border-stone-800 p-6 w-full max-w-3xl shadow-2xl relative overflow-hidden">
+      <div className="bg-[#14110f] border-2 border-stone-800 p-4 sm:p-6 w-full max-w-3xl shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 left-0 w-10 h-10 border-t-2 border-l-2 border-amber-900" />
         <div className="absolute top-0 right-0 w-10 h-10 border-t-2 border-r-2 border-amber-900" />
 
         <h2 className="flex items-center gap-2 text-amber-600 text-2xl font-black uppercase italic tracking-wider mb-1"><Sword size={22} /> The Carnage</h2>
         <p className="text-stone-600 text-xs mb-5 uppercase tracking-widest font-bold">Duel #{battle.game_id}</p>
 
-        {/* Arena */}
-        <div className="flex justify-center">
-          <div className="arena" style={{
+        {/* Arena – scales down on narrow screens */}
+        <div
+          ref={arenaWrapRef}
+          style={{ width: '100%', overflow: 'hidden', position: 'relative' }}
+        >
+          <div style={{
+            transform: 'scale(var(--arena-scale, 1))',
+            transformOrigin: 'top left',
             width: 625,
-            height: 280,
-            backgroundImage: "url('/assets/img/arena.jpg')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center center',
             position: 'relative',
+            left: 'var(--arena-offset, 0px)',
           }}>
+            <div className="arena" style={{
+              width: 625,
+              height: 280,
+              backgroundImage: "url('/assets/img/arena.jpg')",
+              backgroundSize: 'cover',
+              backgroundPosition: 'center center',
+              position: 'relative',
+            }}>
             <div id="hp1-box" className="hp-box">
               <div id="hp1-bar" className="hp-bar" />
             </div>
@@ -73,6 +101,7 @@ export default function FightModal({ battle, onClose }: Props) {
             </div>
             <canvas id="player1" className="fighter" width={320} height={280} />
             <canvas id="player2" className="fighter" width={320} height={280} />
+            </div>
           </div>
         </div>
 

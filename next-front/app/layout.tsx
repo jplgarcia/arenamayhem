@@ -31,12 +31,12 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#1a1614] text-stone-200 font-serif selection:bg-amber-900 selection:text-white`}>
         <WalletProvider>
           <Header />
-          <div className="max-w-full px-8 py-8 flex gap-10 pb-20">
+          <div className="max-w-full px-4 sm:px-8 py-6 sm:py-8 flex gap-6 lg:gap-10 pb-24 md:pb-20">
             <Nav />
             <main className="flex-1 min-w-0">{children}</main>
           </div>
           {/* Fixed footer */}
-          <footer className="fixed bottom-0 w-full bg-[#14110f] border-t-2 border-stone-800 px-8 py-2.5 flex justify-between items-center text-[10px] text-stone-600 uppercase tracking-[0.3em] font-bold font-sans z-40">
+          <footer className="fixed bottom-0 w-full bg-[#14110f] border-t-2 border-stone-800 px-4 sm:px-8 py-2.5 hidden md:flex justify-between items-center text-[10px] text-stone-600 uppercase tracking-[0.3em] font-bold font-sans z-40">
             <div className="flex gap-8">
               <span className="flex items-center gap-2">
                 <span className="w-1.5 h-1.5 bg-green-900 rounded-full border border-green-500 inline-block" />
