@@ -21,7 +21,18 @@ export default function FightModal({ battle, onClose }: Props) {
     const w = window as any;
     if (typeof w.fight !== 'function') return;
     w.preload?.();
-    w.fight(battleRef.current.rounds, battleRef.current.fighters);
+    // fight.js expects a `weapon` field for sprite selection.
+    // New schema uses `element` — map to a default weapon sprite.
+    const ELEM_TO_WEAPON: Record<string, string> = {
+      fire: 'sword', water: 'axe', thunder: 'sword',
+      earth: 'lance', wind: 'axe', ice: 'lance',
+      light: 'sword', dark: 'axe',
+    };
+    const fighters = (battleRef.current.fighters ?? []).map((f: any) => ({
+      ...f,
+      weapon: f.weapon ?? ELEM_TO_WEAPON[f.element] ?? 'sword',
+    }));
+    w.fight(battleRef.current.rounds, fighters);
   }, []);
 
   useEffect(() => {

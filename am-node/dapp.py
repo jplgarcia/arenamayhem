@@ -133,6 +133,7 @@ def handle_advance(data):
                 req_json["challenge_id"],
                 msg_sender.lower(),
                 req_json["fighter"],
+                req_json.get("seed", ""),
             )
             response = requests.post(
                 rollup_server + "/notice",

@@ -7,6 +7,7 @@ import { getERC20Balance } from '@/lib/inspect';
 import { config } from '@/lib/config';
 import FighterModal, { type Fighter } from '@/components/FighterModal';
 import { Sword, RefreshCw, Loader2 } from 'lucide-react';
+import { formatEther } from 'viem';
 
 export default function ChallengesPage() {
   const { account, connected, connect } = useWallet();
@@ -55,6 +56,7 @@ export default function ChallengesPage() {
     await addInput(JSON.stringify({
       method: 'accept_challenge',
       fighter,
+      seed: fighter.seed,
       challenge_id: accepting.id,
     }));
     setAccepting(null);
@@ -106,7 +108,7 @@ export default function ChallengesPage() {
               <div className="text-right">
                 <p className="text-[10px] text-stone-600 uppercase font-black">Pot</p>
                 <p className="text-2xl font-black italic text-stone-100 leading-none">
-                  {b.amount} <span className="text-[10px] not-italic text-stone-600">tokens</span>
+                  {formatEther(BigInt(b.amount))} <span className="text-[10px] not-italic text-stone-600">tokens</span>
                 </p>
               </div>
             </div>
@@ -135,7 +137,7 @@ export default function ChallengesPage() {
       {accepting && (
         <FighterModal
           message="Forge your warrior for this duel"
-          value={accepting.amount}
+          value={accepting.amount ? formatEther(BigInt(accepting.amount)) : undefined}
           onConfirm={submitAccept}
           onCancel={() => setAccepting(null)}
         />

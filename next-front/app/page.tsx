@@ -10,6 +10,7 @@ import { config } from '@/lib/config';
 import FighterModal, { type Fighter } from '@/components/FighterModal';
 import FightModal from '@/components/FightModal';
 import { Sword, Shield, Coins, RefreshCw, Loader2, Flame, Clock } from 'lucide-react';
+import { formatEther } from 'viem';
 
 type ModalState =
   | { type: 'fighter'; mode: 'create' | 'start'; report: any }
@@ -62,9 +63,14 @@ export default function HomePage() {
   async function submitCreateChallenge(fighter: Fighter) {
     await initWallet();
     const hash = SHA256(
-      [fighter.name, fighter.weapon, fighter.hp, fighter.atk, fighter.def, fighter.spd].join('-'),
+      [fighter.name, fighter.element,
+       fighter.boons.hp, fighter.boons.pow, fighter.boons.skl,
+       fighter.boons.spd, fighter.boons.lck, fighter.boons.def, fighter.boons.res,
+       fighter.seed,
+      ].join('-'),
     ).toString(enc.Hex);
     localStorage.setItem(hash, JSON.stringify(fighter));
+    // Commit phase: only the hash is sent. Seed stays in localStorage until start_match.
     await addInput(JSON.stringify({
       method: 'create_challenge',
       fighter_hash: hash,
@@ -83,7 +89,13 @@ export default function HomePage() {
 
   async function submitStartFight(fighter: Fighter, report: any) {
     await initWallet();
-    await addInput(JSON.stringify({ method: 'start_match', fighter, challenge_id: report.id }));
+    const saved = localStorage.getItem(report.fighter_hash);
+    const savedData = saved ? JSON.parse(saved) : fighter;
+    await addInput(JSON.stringify({
+      method: 'start_match',
+      fighter: { ...fighter, seed: savedData.seed ?? '' },
+      challenge_id: report.id,
+    }));
     setModal(null);
     for (let i = 0; i < 24; i++) {
       await new Promise((r) => setTimeout(r, 5000));
@@ -152,7 +164,7 @@ export default function HomePage() {
                 <p className="font-mono text-xs text-stone-600 mb-1"># {b.id}</p>
                 <div className="flex items-center gap-2 mb-1">
                   <Coins size={12} className="text-amber-600" />
-                  <p className="text-xs text-amber-500 font-bold uppercase tracking-widest">Wager: {b.amount}</p>
+                  <p className="text-xs text-amber-500 font-bold uppercase tracking-widest">Wager: {formatEther(BigInt(b.amount))} tokens</p>
                 </div>
                 <p className="text-sm text-stone-400 italic">
                   {b.status === 'accepted'
@@ -192,6 +204,7 @@ export default function HomePage() {
           message={modal.mode === 'create' ? 'You are creating a challenge' : 'You are starting the fight'}
           value={wage}
           initial={modal.report?.savedFighter}
+          locked={modal.mode === 'start' && !!modal.report?.savedFighter}
           onConfirm={(f) => {
             if (modal.mode === 'create') submitCreateChallenge(f);
             else submitStartFight(f, modal.report);

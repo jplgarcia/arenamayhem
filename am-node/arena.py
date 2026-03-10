@@ -1,134 +1,171 @@
-import math
+import random
 
-def calculate_damage(attacker, defender):
-    # Determine weapon triangle advantage
-    advantage_multiplier = 1.0
-    if ((attacker.weapon == 'sword' and defender.weapon == 'axe')
-     or (attacker.weapon == 'axe'   and defender.weapon == 'lance')
-     or (attacker.weapon == 'lance' and defender.weapon == 'sword')):
-        advantage_multiplier = 1.2
+# ── Element effectiveness ──────────────────────────────────────────────────────
+# Rows = attacker, Cols = defender  →  1.25 advantage / 0.75 resist / 1.00 neutral
+# Cycle: Fire>Ice>Wind>Earth>Thunder>Water>Fire  |  Light<>Dark
+ELEMENTS = ['fire', 'water', 'thunder', 'earth', 'wind', 'ice', 'light', 'dark']
 
-    damage = int(attacker.ATK * advantage_multiplier - defender.DEF)
-    damage = max(damage, 0)  # Ensure non-negative damage
-    return damage
+ADVANTAGE_TABLE = {
+    'fire':    {'fire':1.00,'water':0.75,'thunder':1.00,'earth':1.00,'wind':1.00,'ice':1.25,'light':1.00,'dark':1.00},
+    'water':   {'fire':1.25,'water':1.00,'thunder':0.75,'earth':1.00,'wind':1.00,'ice':1.00,'light':1.00,'dark':1.00},
+    'thunder': {'fire':1.00,'water':1.25,'thunder':1.00,'earth':0.75,'wind':1.00,'ice':1.00,'light':1.00,'dark':1.00},
+    'earth':   {'fire':1.00,'water':1.00,'thunder':1.25,'earth':1.00,'wind':0.75,'ice':1.00,'light':1.00,'dark':1.00},
+    'wind':    {'fire':1.00,'water':1.00,'thunder':1.00,'earth':1.25,'wind':1.00,'ice':0.75,'light':1.00,'dark':1.00},
+    'ice':     {'fire':0.75,'water':1.00,'thunder':1.00,'earth':1.00,'wind':1.25,'ice':1.00,'light':1.00,'dark':1.00},
+    'light':   {'fire':1.00,'water':1.00,'thunder':1.00,'earth':1.00,'wind':1.00,'ice':1.00,'light':1.00,'dark':1.25},
+    'dark':    {'fire':1.00,'water':1.00,'thunder':1.00,'earth':1.00,'wind':1.00,'ice':1.00,'light':1.25,'dark':1.00},
+}
 
+# Physical elements reduce with DEF; Special with RES
+PHYSICAL_ELEMENTS = {'earth', 'wind', 'ice', 'dark'}
+SPECIAL_ELEMENTS  = {'fire', 'water', 'thunder', 'light'}
+
+# ── Fixed weapon stats (feature-flagged for later) ────────────────────────────
+WEAPON_HIT  = 60
+WEAPON_MT   = 5
+WEAPON_CRIT = 5
+
+# ── Boon system ───────────────────────────────────────────────────────────────
+BASE_STATS = {'hp': 75, 'pow': 15, 'skl': 15, 'spd': 15, 'lck': 15, 'def': 15, 'res': 15}
+BOON_BONUS = {'hp':  7, 'pow':  2, 'skl':  4, 'spd':  1, 'lck':  5, 'def':  3, 'res':  3}
+MAX_BOONS  = 10
+
+def boons_to_stats(boons: dict) -> dict:
+    return {stat: BASE_STATS[stat] + BOON_BONUS[stat] * int(boons.get(stat, 0))
+            for stat in BASE_STATS}
+
+# ── Character ─────────────────────────────────────────────────────────────────
 class Character:
-    def __init__(self, identifier, name, weapon, HP, ATK, DEF, SPD):
+    def __init__(self, identifier, name, element, boons):
         self.identifier = identifier
-        self.name = name 
-        self.weapon = weapon 
-        self.HP = HP
-        self.ATK = ATK
-        self.DEF = DEF
-        self.SPD = SPD 
+        self.name    = name
+        self.element = element.lower()
+        stats        = boons_to_stats(boons)
+        self.HP      = stats['hp']
+        self.POW     = stats['pow']
+        self.SKL     = stats['skl']
+        self.SPD     = stats['spd']
+        self.LCK     = stats['lck']
+        self.DEF     = stats['def']
+        self.RES     = stats['res']
+        self.total_hp = self.HP
 
-        self.total_hp = HP
+    def is_cheater(self, boons):
+        if self.element not in ELEMENTS:
+            return True
+        if any(int(v) < 0 for v in boons.values()):
+            return True
+        if sum(int(v) for v in boons.values()) > MAX_BOONS:
+            return True
+        return False
 
-    def is_cheater(self):
-        threshold_all = 100
-        threshold_single = 40
-        sum_stats = self.HP + self.ATK + self.SPD + self.DEF
-        return (sum_stats > threshold_all
-            or self.HP > threshold_single
-            or self.ATK > threshold_single
-            or self.DEF > threshold_single
-            or self.SPD > threshold_single
-            or self.HP < 1
-            or self.ATK < 1
-            or self.DEF < 1
-            or self.SPD < 1)
-
-    def is_faster_than(self, character):
-        return self.SPD > character.SPD + 5
+    def defense_vs(self, attacker_element):
+        return self.DEF if attacker_element in PHYSICAL_ELEMENTS else self.RES
 
     def is_alive(self):
         return self.HP > 0
 
-def turn(attacker, defender, log):
-    damage = calculate_damage(attacker, defender)
+# ── Combat helpers ────────────────────────────────────────────────────────────
+def get_multiplier(atk_elem, def_elem):
+    return ADVANTAGE_TABLE.get(atk_elem, {}).get(def_elem, 1.0)
+
+def does_hit(attacker, defender, mult, rng: random.Random):
+    """RNG-based hit check seeded from combined player seeds."""
+    hit_rate  = (attacker.SKL * 2) + (attacker.LCK // 2) + WEAPON_HIT
+    hit_rate += 15 if mult == 1.25 else (-15 if mult == 0.75 else 0)
+    avoid     = (defender.SPD * 2) + defender.LCK
+    chance    = max(0, min(100, hit_rate - avoid))
+    return rng.randint(0, 99) < chance
+
+def is_crit(attacker, defender, rng: random.Random):
+    """RNG-based crit check."""
+    crit_chance = max(0, (attacker.SKL // 2) + WEAPON_CRIT - defender.LCK)
+    return rng.randint(0, 99) < crit_chance
+
+def calculate_damage(attacker, defender, rng: random.Random):
+    mult    = get_multiplier(attacker.element, defender.element)
+    defense = defender.defense_vs(attacker.element)
+    dmg     = (attacker.POW + WEAPON_MT - defense) * mult
+    dmg     = max(dmg, 0)
+    if is_crit(attacker, defender, rng):
+        dmg *= 3
+    return int(dmg)
+
+def turn(attacker, defender, rng: random.Random, log):
+    mult    = get_multiplier(attacker.element, defender.element)
+    hit     = does_hit(attacker, defender, mult, rng)
+    damage  = calculate_damage(attacker, defender, rng) if hit else 0
     defender.HP -= damage
 
-    log.append(f"{attacker.name} attacks {defender.name} with {attacker.weapon} for {damage} damage.")
-    log.append(f"{defender.name}'s HP: {defender.HP} - {defender.HP*100/defender.total_hp}")
+    verb = "hits" if hit else "misses"
+    log.append(f"{attacker.name} ({attacker.element}) {verb} {defender.name} for {damage} dmg.")
+    log.append(f"{defender.name} HP: {max(defender.HP,0)}/{defender.total_hp}")
 
     return {
-        "attacker_id"   : attacker.identifier,
-        "attacker_name" : attacker.name,
-        "defender_name" : defender.name,
-        "damage"        : damage,
-        "defender_hp"   : defender.HP * 100 / defender.total_hp
+        "attacker_id":   attacker.identifier,
+        "attacker_name": attacker.name,
+        "defender_name": defender.name,
+        "damage":        damage,
+        "hit":           hit,
+        "defender_hp":   max(defender.HP, 0) * 100 / defender.total_hp,
     }
-    
-def battle(char1, char2):
-    if (char1.is_cheater() or char2.is_cheater()):
-        return {"winner": -1, "rounds": []}
 
-    log = []
+# ── Battle ────────────────────────────────────────────────────────────────────
+def battle(char1, char2, boons1, boons2, seed1: str = '', seed2: str = ''):
+    """Run a battle. combined_seed = seed1 + seed2 is used to seed the RNG."""
+    rng = random.Random(seed1 + seed2)
+
+    if char1.is_cheater(boons1) or char2.is_cheater(boons2):
+        return {"winner": {"id": -1, "name": "draw"}, "rounds": []}, []
+
+    log    = []
     rounds = []
     current_round = 1
 
-    char1.HP       *=  5; char2.HP       *=  5
-    char1.total_hp *=  5; char2.total_hp *=  5
-    char1.ATK      += 10; char2.ATK      += 10
-
-    # the attack order for the first round is based on SPD
-    attacker, defender = char1, char2
-    if char2.SPD > char1.SPD:
-        attacker, defender = defender, attacker
+    # Faster unit attacks first
+    attacker, defender = (char1, char2) if char1.SPD >= char2.SPD else (char2, char1)
 
     while True:
-        log.append(f"Round {current_round}:")
+        log.append(f"--- Round {current_round} ---")
         turns = []
         rounds.append(turns)
 
-        # first strike
-        turns.append(turn(attacker, defender, log))
+        # First strike
+        turns.append(turn(attacker, defender, rng, log))
         if not defender.is_alive():
             break
 
-        # counter strike
-        turns.append(turn(defender, attacker, log))
+        # Counter
+        turns.append(turn(defender, attacker, rng, log))
         if not attacker.is_alive():
             break
 
-        # extra strike
-        faster, slower = None, None
-        if attacker.is_faster_than(defender):
-            faster, slower = attacker, defender
-        elif defender.is_faster_than(attacker):
-            faster, slower = defender, attacker
-
-        if faster is not None and slower is not None:
-            log.append(f"{faster.name} strikes again.")
-            turns.append(turn(faster, slower, log))
-            if not slower.is_alive():
+        # Double attack (SPD >= opponent + 4)
+        if attacker.SPD >= defender.SPD + 4:
+            log.append(f"{attacker.name} strikes again! (double)")
+            turns.append(turn(attacker, defender, rng, log))
+            if not defender.is_alive():
                 break
-
-        # boosts ATK for the next round
-        boost = 2 * math.sqrt(current_round)
-        char1.ATK += boost
-        char2.ATK += boost
+        elif defender.SPD >= attacker.SPD + 4:
+            log.append(f"{defender.name} strikes again! (double)")
+            turns.append(turn(defender, attacker, rng, log))
+            if not attacker.is_alive():
+                break
 
         attacker, defender = defender, attacker
         current_round += 1
-        
+        if current_round > 30:   # safety cap
+            break
 
-    # Determine the winner
-    winner = char1 if char2.HP <= 0 else char2
-    log.append(f"{winner.name} wins!")
-    result = {
-        "rounds": rounds,
-        "winner": {
-            "id"   : winner.identifier,
-            "name" : winner.name,
-        }
-    }
+    if char1.HP <= 0 and char2.HP <= 0:
+        winner_data = {"id": -1, "name": "draw"}
+    elif char2.HP <= 0:
+        winner_data = {"id": char1.identifier, "name": char1.name}
+        log.append(f"{char1.name} wins!")
+    elif char1.HP <= 0:
+        winner_data = {"id": char2.identifier, "name": char2.name}
+        log.append(f"{char2.name} wins!")
+    else:
+        winner_data = {"id": -1, "name": "draw"}
 
-    return result, log
-
-# c1 = Character(0, "TANK", "lance", 30, 20, 40, 10)
-# c2 = Character(1, "DPS",  "axe",   20, 40, 10, 30)
-# result, log = battle(c1, c2)
-# print(result)
-# for entry in log:
-#     print(entry)
+    return {"rounds": rounds, "winner": winner_data}, log
