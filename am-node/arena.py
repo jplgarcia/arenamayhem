@@ -87,17 +87,18 @@ def calculate_damage(attacker, defender, rng: random.Random):
     defense = defender.defense_vs(attacker.element)
     dmg     = (attacker.POW + WEAPON_MT - defense) * mult
     dmg     = max(dmg, 0)
-    if is_crit(attacker, defender, rng):
+    crit    = is_crit(attacker, defender, rng)
+    if crit:
         dmg *= 3
-    return int(dmg)
+    return int(dmg), crit
 
 def turn(attacker, defender, rng: random.Random, log):
-    mult    = get_multiplier(attacker.element, defender.element)
-    hit     = does_hit(attacker, defender, mult, rng)
-    damage  = calculate_damage(attacker, defender, rng) if hit else 0
-    defender.HP -= damage
+    mult          = get_multiplier(attacker.element, defender.element)
+    hit           = does_hit(attacker, defender, mult, rng)
+    damage, crit  = calculate_damage(attacker, defender, rng) if hit else (0, False)
+    defender.HP  -= damage
 
-    verb = "hits" if hit else "misses"
+    verb = "crits" if crit else ("hits" if hit else "misses")
     log.append(f"{attacker.name} ({attacker.element}) {verb} {defender.name} for {damage} dmg.")
     log.append(f"{defender.name} HP: {max(defender.HP,0)}/{defender.total_hp}")
 
@@ -107,6 +108,7 @@ def turn(attacker, defender, rng: random.Random, log):
         "defender_name": defender.name,
         "damage":        damage,
         "hit":           hit,
+        "crit":          crit,
         "defender_hp":   max(defender.HP, 0) * 100 / defender.total_hp,
     }
 

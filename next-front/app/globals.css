@@ -29,7 +29,7 @@ body {
 
 .arena {
   width: 625px;
-  height: 300px;
+  height: 280px;
   background-image: url('/assets/img/arena.jpg');
   background-size: cover;
   position: relative;
@@ -58,25 +58,34 @@ body {
 #hp2-box { left: 348px; }
 
 .fighter {
-  display: inline-block;
-  width: 310px;
-  height: 300px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  animation-name: sword-idle;
-  animation-duration: 1s;
-  animation-timing-function: step-start;
-  animation-iteration-count: infinite;
+  display: block;
   position: absolute;
-  background-position-y: 45px;
-  left: 0;
+  bottom: 0;
+  image-rendering: pixelated;
 }
 
-#player1 { transition: left 1s ease; }
-.flipped  { transform: scaleX(-1); }
-.right    { left: 310px; transition: left 1s ease; }
-.advanced { left: 155px; transition: left 1s ease; }
+/* Both fighters anchored to arena center. translateX(-50%) truly centers the
+   310px div regardless of width, then ±20px gives slight facing separation. */
+#player1 { left: calc(50% - 20px); transform: translateX(-50%) scaleX(-1); transition: left 1s ease; }
+#player2 { left: calc(50% + 20px); transform: translateX(-50%);             transition: left 1s ease; }
+.advanced { left: calc(50% + 40px); transition: left 1s ease; }
+
+@keyframes combat-label {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(0);     }
+  70%  { opacity: 1; transform: translateX(-50%) translateY(-40px); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-55px); }
+}
+.combat-label {
+  position: absolute;
+  pointer-events: none;
+  font-weight: 900;
+  font-size: 20px;
+  letter-spacing: 3px;
+  text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+  animation: combat-label 1s ease-out forwards;
+  z-index: 10;
+  white-space: nowrap;
+}
 
 @keyframes sword-idle   { 0%{background-image:url('/assets/img/sword/sword_IDLE_000.png')} 10%{background-image:url('/assets/img/sword/sword_IDLE_001.png')} 20%{background-image:url('/assets/img/sword/sword_IDLE_002.png')} 30%{background-image:url('/assets/img/sword/sword_IDLE_003.png')} 40%{background-image:url('/assets/img/sword/sword_IDLE_004.png')} 50%{background-image:url('/assets/img/sword/sword_IDLE_005.png')} 60%{background-image:url('/assets/img/sword/sword_IDLE_006.png')} 70%{background-image:url('/assets/img/sword/sword_IDLE_007.png')} 80%{background-image:url('/assets/img/sword/sword_IDLE_008.png')} 90%{background-image:url('/assets/img/sword/sword_IDLE_009.png')} 100%{background-image:url('/assets/img/sword/sword_IDLE_000.png')} }
 @keyframes sword-run    { 0%{background-image:url('/assets/img/sword/sword_RUN_000.png')} 10%{background-image:url('/assets/img/sword/sword_RUN_001.png')} 20%{background-image:url('/assets/img/sword/sword_RUN_002.png')} 30%{background-image:url('/assets/img/sword/sword_RUN_003.png')} 40%{background-image:url('/assets/img/sword/sword_RUN_004.png')} 50%{background-image:url('/assets/img/sword/sword_RUN_005.png')} 60%{background-image:url('/assets/img/sword/sword_RUN_006.png')} 70%{background-image:url('/assets/img/sword/sword_RUN_007.png')} 80%{background-image:url('/assets/img/sword/sword_RUN_008.png')} 90%{background-image:url('/assets/img/sword/sword_RUN_009.png')} 100%{background-image:url('/assets/img/sword/sword_RUN_000.png')} }

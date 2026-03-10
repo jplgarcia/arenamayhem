@@ -20,18 +20,8 @@ export default function FightModal({ battle, onClose }: Props) {
   const startAnim = useCallback(() => {
     const w = window as any;
     if (typeof w.fight !== 'function') return;
-    w.preload?.();
-    // fight.js expects a `weapon` field for sprite selection.
-    // New schema uses `element` — map to a default weapon sprite.
-    const ELEM_TO_WEAPON: Record<string, string> = {
-      fire: 'sword', water: 'axe', thunder: 'sword',
-      earth: 'lance', wind: 'axe', ice: 'lance',
-      light: 'sword', dark: 'axe',
-    };
-    const fighters = (battleRef.current.fighters ?? []).map((f: any) => ({
-      ...f,
-      weapon: f.weapon ?? ELEM_TO_WEAPON[f.element] ?? 'sword',
-    }));
+    // fight.js reads .element and .boons from each fighter directly.
+    const fighters = battleRef.current.fighters ?? [];
     w.fight(battleRef.current.rounds, fighters);
   }, []);
 
@@ -65,13 +55,14 @@ export default function FightModal({ battle, onClose }: Props) {
         <h2 className="flex items-center gap-2 text-amber-600 text-2xl font-black uppercase italic tracking-wider mb-1"><Sword size={22} /> The Carnage</h2>
         <p className="text-stone-600 text-xs mb-5 uppercase tracking-widest font-bold">Duel #{battle.game_id}</p>
 
-        {/* Arena canvas – 625×300 matches fight.js sprite layout */}
-        <div className="overflow-x-auto">
+        {/* Arena */}
+        <div className="flex justify-center">
           <div className="arena" style={{
             width: 625,
-            height: 300,
+            height: 280,
             backgroundImage: "url('/assets/img/arena.jpg')",
             backgroundSize: 'cover',
+            backgroundPosition: 'center center',
             position: 'relative',
           }}>
             <div id="hp1-box" className="hp-box">
@@ -80,8 +71,8 @@ export default function FightModal({ battle, onClose }: Props) {
             <div id="hp2-box" className="hp-box">
               <div id="hp2-bar" className="hp-bar" />
             </div>
-            <div id="player1" className="fighter" />
-            <div id="player2" className="fighter flipped right" />
+            <canvas id="player1" className="fighter" width={320} height={280} />
+            <canvas id="player2" className="fighter" width={320} height={280} />
           </div>
         </div>
 

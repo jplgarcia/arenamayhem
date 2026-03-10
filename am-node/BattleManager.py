@@ -100,7 +100,7 @@ class BattleManager:
             self.wallet.erc20_transfer("0x0", opponent_id, token, amount) # their money
             self.wallet.erc20_transfer("0x0", opponent_id, token, amount) # owner money
             self.wallet.erc20_transfer("0x0", opponent_id, token, amount) # owner stake
-            return
+            raise Exception("Fighter hash mismatch or invalid boons — owner penalised, opponent awarded.")
         
 
         self.wallet.erc20_transfer("0x0", sender_id, token, amount) # game creator gets it's stake back

@@ -157,7 +157,7 @@ def handle_advance(data):
     except Exception as error:
         error_msg = f"Failed to process command '{payload}'. {error}"
         requests.post(rollup_server + "/report", json={"payload": encode(error_msg)})
-        logger.debug(error_msg, exc_info=True)
+        logger.warning(error_msg, exc_info=True)
         return "reject"
             
 
