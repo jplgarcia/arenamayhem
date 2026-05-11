@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Arena Mayhem — Animation Preview</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #111; color: #eee; font-family: monospace; padding: 24px; }
+    h1 { font-size: 18px; margin-bottom: 16px; color: #fbbf24; letter-spacing: 2px; text-transform: uppercase; }
+
+    /* ── Controls ─────────────────────────────────────── */
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; align-items: flex-end;
+    }
+    .controls label { font-size: 12px; color: #aaa; display: block; margin-bottom: 4px; }
+    select, button {
+      background: #222; color: #eee; border: 1px solid #444;
+      padding: 6px 12px; font-family: monospace; font-size: 13px; cursor: pointer;
+    }
+    select:focus, button:focus { outline: 1px solid #fbbf24; }
+    button { background: #1a1a2e; border-color: #fbbf24; color: #fbbf24; }
+    button:hover { background: #fbbf24; color: #111; }
+    button.secondary { border-color: #555; color: #aaa; }
+    button.secondary:hover { background: #333; color: #eee; }
+    .seq-buttons { display: flex; flex-wrap: wrap; gap: 6px; }
+    .seq-buttons button { font-size: 11px; padding: 5px 10px; border-color: #555; color: #aaa; }
+    .seq-buttons button:hover { background: #333; color: #eee; }
+    .seq-buttons button.loop { border-color: #34d399; color: #34d399; }
+    .seq-buttons button.loop:hover { background: #34d399; color: #111; }
+
+    /* ── Status ───────────────────────────────────────── */
+    #status { font-size: 12px; color: #6b7280; margin-bottom: 16px; min-height: 18px; }
+
+    /* ── Arena (exact copy of globals.css) ────────────── */
+    .arena-wrap { overflow: hidden; }
+    .arena {
+      width: 625px; height: 280px;
+      background-image: url('/assets/img/arena.jpg');
+      background-size: cover;
+      position: relative;
+    }
+    .hp-box {
+      margin-top: 5px; position: absolute; display: inline-block;
+      width: 204px; height: 14px; border: 1px solid black;
+    }
+    .hp-bar {
+      position: absolute; display: inline-block;
+      width: 200px; height: 10px; margin: 2px;
+      background-color: #52c349; transition: all 0.5s ease;
+    }
+    #hp1-box { left: 72px; }
+    #hp2-box { left: 348px; }
+    .fighter {
+      display: block; position: absolute; bottom: 0; image-rendering: pixelated;
+    }
+    #player1 { left: calc(50% - 20px); transform: translateX(-50%) scaleX(-1); transition: left 1s ease; }
+    #player2 { left: calc(50% + 20px); transform: translateX(-50%);             transition: left 1s ease; }
+
+    @keyframes combat-label {
+      0%   { opacity: 1; transform: translateX(-50%) translateY(0);     }
+      70%  { opacity: 1; transform: translateX(-50%) translateY(-40px); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-55px); }
+    }
+    .combat-label {
+      position: absolute; pointer-events: none; font-weight: 900;
+      font-size: 20px; letter-spacing: 3px;
+      text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+      animation: combat-label 1s ease-out forwards; z-index: 10; white-space: nowrap;
+    }
+
+    /* ── Full fight simulator ─────────────────────────── */
+    #fight-section { margin-top: 28px; border-top: 1px solid #333; padding-top: 20px; }
+    #fight-section h2 { font-size: 14px; color: #fbbf24; margin-bottom: 12px; }
+    .fight-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 12px; }
+
+    /* ── Log ──────────────────────────────────────────── */
+    #log {
+      margin-top: 16px; background: #1a1a1a; border: 1px solid #333;
+      padding: 10px; font-size: 11px; color: #6b7280;
+      max-height: 120px; overflow-y: auto; white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>⚔ Arena Mayhem — Animation Preview</h1>
+
+  <!-- ── Single-sequence controls ──────────────────── -->
+  <div class="controls">
+    <div>
+      <label>Player 1 class</label>
+      <select id="p1-class"></select>
+    </div>
+    <div>
+      <label>Player 2 class</label>
+      <select id="p2-class"></select>
+    </div>
+    <div>
+      <label>Apply</label>
+      <button onclick="applyClasses()">Apply classes</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div>
+      <label>Play sequence on P1</label>
+      <div class="seq-buttons" id="p1-seqs"></div>
+    </div>
+  </div>
+  <div class="controls">
+    <div>
+      <label>Play sequence on P2</label>
+      <div class="seq-buttons" id="p2-seqs"></div>
+    </div>
+  </div>
+
+  <div id="status">Idle</div>
+
+  <!-- ── Arena ──────────────────────────────────────── -->
+  <div class="arena-wrap">
+    <div class="arena">
+      <div id="hp1-box" class="hp-box"><div id="hp1-bar" class="hp-bar"></div></div>
+      <div id="hp2-box" class="hp-box"><div id="hp2-bar" class="hp-bar"></div></div>
+      <canvas id="player1" class="fighter" width="320" height="280"></canvas>
+      <canvas id="player2" class="fighter" width="320" height="280"></canvas>
+    </div>
+  </div>
+
+  <!-- ── Full fight simulator ──────────────────────── -->
+  <div id="fight-section">
+    <h2>Full fight simulator</h2>
+    <div class="fight-row">
+      <div>
+        <label>Attacker (P1 → P2)</label>
+        <select id="sim-hit">
+          <option value="hit">Hit</option>
+          <option value="crit">Crit</option>
+          <option value="miss">Miss</option>
+        </select>
+      </div>
+      <div>
+        <label>Damage</label>
+        <input id="sim-dmg" type="number" value="12" min="0" max="99"
+          style="width:60px;background:#222;color:#eee;border:1px solid #444;padding:6px;font-family:monospace;font-size:13px;">
+      </div>
+      <div>
+        <label>Run 1 turn</label>
+        <button onclick="runOneTurn()">▶ Run turn</button>
+      </div>
+      <div>
+        <label>Full fight (demo)</label>
+        <button onclick="runDemoFight()">▶ Full demo fight</button>
+      </div>
+      <div>
+        <label>Reset</label>
+        <button class="secondary" onclick="resetArena()">↺ Reset</button>
+      </div>
+    </div>
+    <div id="log"></div>
+  </div>
+
+  <script src="/js/fight.js"></script>
+  <script>
+    // ── Populate class dropdowns ──────────────────────────────
+    const CLASS_KEYS = Object.keys(ANIM_SETS);
+    let p1Set, p2Set;
+
+    function buildDropdowns() {
+      ['p1-class', 'p2-class'].forEach((id, i) => {
+        const sel = document.getElementById(id);
+        CLASS_KEYS.forEach(k => {
+          const opt = document.createElement('option');
+          opt.value = k; opt.textContent = k;
+          if (i === 0 && k === 'maligknt-axe') opt.selected = true;
+          if (i === 1 && k === 'maligknt-axe') opt.selected = true;
+          sel.appendChild(opt);
+        });
+      });
+      applyClasses();
+    }
+
+    function applyClasses() {
+      p1Set = ANIM_SETS[document.getElementById('p1-class').value];
+      p2Set = ANIM_SETS[document.getElementById('p2-class').value];
+      preloadAnimSet(p1Set);
+      preloadAnimSet(p2Set);
+      buildSeqButtons(0, p1Set);
+      buildSeqButtons(1, p2Set);
+      resetArena();
+      setStatus('Classes applied — idle loop running.');
+    }
+
+    // ── Sequence buttons ──────────────────────────────────────
+    const SEQ_NAMES = ['idle','attack','crit','miss','hurt','dodge','die','dead'];
+
+    function buildSeqButtons(player, animSet) {
+      const container = document.getElementById(player === 0 ? 'p1-seqs' : 'p2-seqs');
+      container.innerHTML = '';
+      SEQ_NAMES.forEach(seq => {
+        if (!animSet.sequences[seq]) return;
+        const isLoop = seq === 'idle' || seq === 'dead';
+        const btn = document.createElement('button');
+        btn.textContent = seq;
+        if (isLoop) btn.classList.add('loop');
+        btn.onclick = () => {
+          const set = player === 0 ? p1Set : p2Set;
+          playAnim(player, set, seq, isLoop);
+          setStatus(`P${player+1}: playing "${seq}"${isLoop ? ' (loop)' : ''}`);
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    // ── Status helper ─────────────────────────────────────────
+    function setStatus(msg) {
+      document.getElementById('status').textContent = msg;
+    }
+
+    // ── HP helper ────────────────────────────────────────────
+    let hp = [100, 100];
+
+    function resetArena() {
+      hp = [100, 100];
+      setHP(0, 100); setHP(1, 100);
+      idleLoop(0, p1Set || MALIGKNT_AXE);
+      idleLoop(1, p2Set || MALIGKNT_AXE);
+    }
+
+    // ── One-turn runner ───────────────────────────────────────
+    async function runOneTurn() {
+      const simHit  = document.getElementById('sim-hit').value;
+      const dmg     = parseInt(document.getElementById('sim-dmg').value) || 0;
+      const atk = 0, def = 1;
+      const atkSet = p1Set, defSet = p2Set;
+
+      const hit  = simHit !== 'miss';
+      const crit = simHit === 'crit';
+      const atkSeq = hit ? (crit ? 'crit' : 'attack') : 'miss';
+      const defSeq = hit ? 'hurt' : 'dodge';
+
+      hp[def] = Math.max(0, hp[def] - dmg);
+      const newHp = hp[def];
+
+      const offset = impactOffset(atkSet, atkSeq);
+      setStatus(`P1 → P2: ${atkSeq.toUpperCase()}, dmg=${dmg}, hp=${newHp}`);
+      log(`P1 → P2 | seq=${atkSeq} dmg=${dmg} hp_after=${newHp}`);
+
+      const atkProm = playAnim(atk, atkSet, atkSeq);
+      const defProm = new Promise(r => setTimeout(() => {
+        if (hit) {
+          setHP(def, newHp);
+          showLabel(def, crit ? `CRIT!  ${dmg}` : String(dmg), crit ? '#fbbf24' : '#f87171', crit);
+        } else {
+          showLabel(def, 'MISS', '#d1d5db', false);
+        }
+        playAnim(def, defSet, defSeq).then(r);
+      }, offset));
+
+      await Promise.all([atkProm, defProm]);
+      if (hp[def] <= 0) {
+        setStatus('P2 defeated — playing die/dead');
+        idleLoop(atk, atkSet);
+        await playAnim(def, defSet, 'die');
+        playAnim(def, defSet, 'dead', true);
+      } else {
+        idleLoop(atk, atkSet);
+        idleLoop(def, defSet);
+        setStatus('Turn done — both idle');
+      }
+    }
+
+    // ── Demo full fight ───────────────────────────────────────
+    async function runDemoFight() {
+      hp = [100, 100];
+      setHP(0, 100); setHP(1, 100);
+
+      const rounds = [
+        [{ attacker_id: 0, hit: true,  crit: false, damage: 18, defender_hp: 70 }],
+        [{ attacker_id: 1, hit: true,  crit: false, damage: 12, defender_hp: 75 }],
+        [{ attacker_id: 0, hit: false, crit: false, damage: 0,  defender_hp: 70 }],
+        [{ attacker_id: 1, hit: true,  crit: true,  damage: 45, defender_hp: 30 }],
+        [
+          { attacker_id: 0, hit: true,  crit: true,  damage: 38, defender_hp: 10 },
+          { attacker_id: 0, hit: true,  crit: false, damage: 15, defender_hp: 0  },
+        ],
+      ];
+      const players = [
+        { animSet: p1Set || MALIGKNT_AXE },
+        { animSet: p2Set || MALIGKNT_AXE },
+      ];
+      setStatus('Running demo fight…');
+      log('--- demo fight start ---');
+      await fight(rounds, players);
+      setStatus('Demo fight complete.');
+      log('--- demo fight end ---');
+    }
+
+    // ── Log helper ───────────────────────────────────────────
+    function log(msg) {
+      const el = document.getElementById('log');
+      el.textContent += msg + '\n';
+      el.scrollTop = el.scrollHeight;
+    }
+
+    // ── Boot ─────────────────────────────────────────────────
+    buildDropdowns();
+  </script>
+</body>
+</html>
