@@ -91,8 +91,34 @@
       <select id="p1-class"></select>
     </div>
     <div>
+      <label>P1 element</label>
+      <select id="p1-element">
+        <option value="Fire">Fire</option>
+        <option value="Water">Water</option>
+        <option value="Thunder">Thunder</option>
+        <option value="Earth">Earth</option>
+        <option value="Wind">Wind</option>
+        <option value="Ice">Ice</option>
+        <option value="Light">Light</option>
+        <option value="Dark">Dark</option>
+      </select>
+    </div>
+    <div>
       <label>Player 2 class</label>
       <select id="p2-class"></select>
+    </div>
+    <div>
+      <label>P2 element</label>
+      <select id="p2-element">
+        <option value="Fire">Fire</option>
+        <option value="Water">Water</option>
+        <option value="Thunder">Thunder</option>
+        <option value="Earth">Earth</option>
+        <option value="Wind">Wind</option>
+        <option value="Ice">Ice</option>
+        <option value="Light">Light</option>
+        <option value="Dark">Dark</option>
+      </select>
     </div>
     <div>
       <label>Apply</label>
@@ -204,6 +230,13 @@
         btn.onclick = () => {
           const set = player === 0 ? p1Set : p2Set;
           playAnim(player, set, seq, isLoop);
+          if (seq === 'attack' || seq === 'crit') {
+            const defender   = player === 0 ? 1 : 0;
+            const elemKey    = player === 0 ? 'p1-element' : 'p2-element';
+            const element    = document.getElementById(elemKey).value;
+            const offset     = impactOffset(set, seq);
+            setTimeout(() => showElementEffect(defender, element, seq === 'crit'), offset);
+          }
           setStatus(`P${player+1}: playing "${seq}"${isLoop ? ' (loop)' : ''}`);
         };
         container.appendChild(btn);
@@ -244,10 +277,12 @@
       setStatus(`P1 → P2: ${atkSeq.toUpperCase()}, dmg=${dmg}, hp=${newHp}`);
       log(`P1 → P2 | seq=${atkSeq} dmg=${dmg} hp_after=${newHp}`);
 
+      const atkElement = document.getElementById('p1-element').value;
       const atkProm = playAnim(atk, atkSet, atkSeq);
       const defProm = new Promise(r => setTimeout(() => {
         if (hit) {
           setHP(def, newHp);
+          showElementEffect(def, atkElement, crit);
           showLabel(def, crit ? `CRIT!  ${dmg}` : String(dmg), crit ? '#fbbf24' : '#f87171', crit);
         } else {
           showLabel(def, 'MISS', '#d1d5db', false);
@@ -284,8 +319,8 @@
         ],
       ];
       const players = [
-        { animSet: p1Set || MALIGKNT_AXE },
-        { animSet: p2Set || MALIGKNT_AXE },
+        { animSet: p1Set || MALIGKNT_AXE, element: document.getElementById('p1-element').value },
+        { animSet: p2Set || MALIGKNT_AXE, element: document.getElementById('p2-element').value },
       ];
       setStatus('Running demo fight…');
       log('--- demo fight start ---');

@@ -971,6 +971,423 @@ function showLabel(player, text, color, big) {
 }
 
 // ============================================================
+//  Elemental hit effects
+// ============================================================
+
+/**
+ * Colour palettes per element: [outer/dark, mid, bright, highlight/white]
+ * Drawn back-to-front so layer 3 always reads on top.
+ */
+const ELEM_COLORS = {
+  Fire:    ['#cc2200', '#ff6600', '#ffaa00', '#ffff88'],
+  Water:   ['#0044aa', '#1177ee', '#44aaff', '#bbddff'],
+  Thunder: ['#999900', '#eecc00', '#ffffff', '#bbccff'],
+  Earth:   ['#4a2000', '#8b5500', '#c89040', '#e8cc90'],
+  Wind:    ['#009933', '#22cc55', '#77ffaa', '#ddfff0'],
+  Ice:     ['#2255bb', '#4488dd', '#99bbff', '#ddeeff'],
+  Light:   ['#ffbb00', '#ffee44', '#ffffff', '#fff8aa'],
+  Dark:    ['#330066', '#7711bb', '#bb44ee', '#550099'],
+};
+
+/**
+ * Pixel-art glyph stencils — one per element.
+ * Format: array of layers, each { ci (color index 0-3), cells [[col,row],...] }
+ * col/row = integer offsets from glyph centre; right/down = positive.
+ * Rendered at `bs` (block size) pixels per cell.
+ */
+const ELEM_STENCILS = {
+
+  // 🔥 Upward flame — wide base, pointed tip
+  Fire: [
+    { ci:0, cells: [                                    // outer red body
+      [-2,1],[-1,1],[0,1],[1,1],[2,1],
+      [-2,0],[-1,0],[0,0],[1,0],[2,0],
+      [-2,-1],[-1,-1],[0,-1],[1,-1],[2,-1],
+      [-1,-2],[0,-2],[1,-2],
+      [0,-3],
+    ]},
+    { ci:1, cells: [                                    // orange mid
+      [-1,0],[0,0],[1,0],
+      [-1,-1],[0,-1],[1,-1],
+      [0,-2],
+    ]},
+    { ci:2, cells: [ [0,-1],[0,-2] ] },                 // yellow core
+    { ci:3, cells: [ [0,-3] ] },                        // white tip
+  ],
+
+  // 🌊 Water wave — base trough + two crests + centre jet
+  Water: [
+    { ci:0, cells: [                                    // trough base
+      [-5,1],[-4,1],[-3,1],[-2,1],[-1,1],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],
+      // left crest
+      [-4,0],[-3,0],[-3,-1],[-4,-1],[-3,-2],
+      // right crest
+      [3,0],[4,0],[3,-1],[4,-1],[3,-2],
+      // centre upward jet
+      [-1,0],[0,0],[1,0],[-1,-1],[0,-1],[1,-1],[0,-2],[0,-3],
+    ]},
+    { ci:1, cells: [ [-3,-1],[3,-1], [-3,-2],[3,-2], [0,-2],[0,-3] ] },
+    { ci:2, cells: [ [-3,-2],[3,-2],[0,-3] ] },
+    { ci:3, cells: [ [0,-3] ] },
+  ],
+
+  // ⛰ Two mountains — tall left peak, shorter right peak, rocky base
+  Earth: [
+    { ci:0, cells: [                                    // ground / base rows
+      [-5,1],[-4,1],[-3,1],[-2,1],[-1,1],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],
+      [-5,0],[-4,0],[-3,0],[-2,0],[-1,0],[0,0],[1,0],[2,0],[3,0],[4,0],[5,0],
+      // right smaller peak
+      [2,-1],[3,-1],[4,-1],[3,-2],
+    ]},
+    { ci:1, cells: [                                    // left big peak body
+      [-2,-1],[-1,-1],[0,-1],[1,-1],
+      [-2,-2],[-1,-2],[0,-2],
+      [-2,-3],[-1,-3],
+      [-1,-4],
+    ]},
+    { ci:2, cells: [ [-2,-2],[-2,-3],[-1,-3] ] },      // sunlit left slope
+    { ci:3, cells: [ [-1,-4] ] },                       // peak highlight
+  ],
+
+  // ❄ Snowflake — 4 orthogonal arms + 4 diagonal arms + branch ticks + centre crystal
+  Ice: [
+    { ci:0, cells: [                                    // arm cells (all 8 arms)
+      [-4,0],[-3,0],[-2,0],[-1,0],[0,0],[1,0],[2,0],[3,0],[4,0],   // horizontal
+      [0,-4],[0,-3],[0,-2],[0,-1],[0,1],[0,2],[0,3],[0,4],          // vertical
+      [-3,-3],[-2,-2],[-1,-1],[1,1],[2,2],[3,3],                    // diagonal ↘
+      [3,-3],[2,-2],[1,-1],[-1,1],[-2,2],[-3,3],                    // diagonal ↙
+    ]},
+    { ci:1, cells: [                                    // branch ticks on orthogonal arms
+      [-3,-1],[-3,1],[3,-1],[3,1],[-2,-1],[-2,1],[2,-1],[2,1],
+      [-1,-3],[1,-3],[-1,3],[1,3],[-1,-2],[1,-2],[-1,2],[1,2],
+    ]},
+    { ci:2, cells: [                                    // branch ticks on diagonal arms
+      [-2,-3],[-3,-2],[2,-3],[3,-2],
+      [-3,2],[-2,3],[2,3],[3,2],
+    ]},
+    { ci:3, cells: [                                    // bright centre crystal
+      [-1,-1],[0,-1],[1,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1],
+    ]},
+  ],
+
+  // ☀ Sun — filled disc + 8 radiating rays
+  Light: [
+    { ci:0, cells: [                                    // sun disc
+      [-1,-2],[0,-2],[1,-2],
+      [-2,-1],[-1,-1],[0,-1],[1,-1],[2,-1],
+      [-2,0], [-1,0], [0,0], [1,0], [2,0],
+      [-2,1], [-1,1], [0,1], [1,1], [2,1],
+      [-1,2], [0,2], [1,2],
+    ]},
+    { ci:1, cells: [                                    // 8 rays (3 cells each)
+      [0,-3],[0,-4],[0,-5], [0,3],[0,4],[0,5],
+      [-3,0],[-4,0],[-5,0], [3,0],[4,0],[5,0],
+      [-2,-2],[-3,-3],[-4,-4], [2,-2],[3,-3],[4,-4],
+      [-2,2],[-3,3],[-4,4],   [2,2],[3,3],[4,4],
+    ]},
+    { ci:2, cells: [ [0,-5],[0,5],[-5,0],[5,0],[-4,-4],[4,-4],[-4,4],[4,4] ] }, // ray tips
+    { ci:3, cells: [                                    // bright centre
+      [-1,-1],[0,-1],[1,-1],[-1,0],[0,0],[1,0],[-1,1],[0,1],[1,1],
+    ]},
+  ],
+
+  // 🌙 Crescent moon — left-facing (shadow on right side)
+  Dark: [
+    { ci:0, cells: [                                    // moon body
+      [0,-4],[1,-4],
+      [-1,-3],[0,-3],[1,-3],[2,-3],
+      [-2,-2],[-1,-2],[0,-2],
+      [-2,-1],[-1,-1],[0,-1],
+      [-2,0], [-1,0], [0,0],
+      [-2,1], [-1,1], [0,1],
+      [-1,2],[0,2],[1,2],[2,2],
+      [0,3],[1,3],
+    ]},
+    { ci:1, cells: [                                    // inner shadow depth
+      [-1,-2],[0,-2],[-1,-1],[0,-1],[-1,0],[0,0],[-1,1],[0,1],
+    ]},
+    { ci:2, cells: [                                    // bright outer rim
+      [-2,-2],[-2,-1],[-2,0],[-2,1],[-1,-3],[0,-4],[-1,3],[0,3],
+    ]},
+    { ci:3, cells: [ [0,-4],[-2,-2],[-2,1],[0,3] ] },  // highlight points
+  ],
+
+  // 💨 Wind — three flowing S-curve arcs
+  Wind: [
+    { ci:0, cells: [                                    // three arcs
+      // top arc curves right then up
+      [-4,-3],[-3,-3],[-2,-3],[-1,-3],[0,-3],[1,-3],[2,-3],[3,-3],
+      [3,-2],[4,-2],[4,-1],
+      // middle arc (wider, offset)
+      [-5,0],[-4,0],[-3,0],[-2,0],[-1,0],[0,0],[1,0],[2,0],[3,0],
+      [3,1],[4,1],[4,2],
+      // bottom arc
+      [-4,3],[-3,3],[-2,3],[-1,3],[0,3],[1,3],[2,3],[3,3],
+    ]},
+    { ci:1, cells: [                                    // mid highlight
+      [-2,-3],[-1,-3],[0,-3],[3,-1],[4,-1],
+      [-3,0],[-2,0],[3,2],[4,2],
+      [-2,3],[-1,3],[0,3],
+    ]},
+    { ci:2, cells: [                                    // bright leading edges
+      [-4,-3],[3,-2],[-5,0],[3,1],[-4,3],[3,3],
+    ]},
+    { ci:3, cells: [] },
+  ],
+
+  // ⚡ Thunder — handled separately via _drawBolt()
+  Thunder: [],
+};
+
+/**
+ * Pixel-art zigzag lightning bolt.
+ * Each row: [col_start_offset_from_centre, width_in_blocks].
+ */
+const _BOLT_ROWS = [
+  [-2, 3], [-1, 2], [-1, 3], [0, 2], [0, 2], [-1, 2],
+];
+
+// ── Particles ───────────────────────────────────────────────
+
+/**
+ * Build a particle list for an elemental hit.  Particles are larger
+ * than the old system and don't travel as high.
+ */
+function _spawnEffect(element, cx, cy, isCrit) {
+  const scale  = isCrit ? 1.5 : 1.0;
+  const colors = ELEM_COLORS[element] || ELEM_COLORS.Fire;
+  const ps     = Math.round(9 * scale);   // bigger than before (was 5)
+  const R      = Math.random.bind(Math);
+  const list   = [];
+
+  function addP(vx, vy, grav, ci, sm) {
+    list.push({
+      x:     cx + (R() - 0.5) * 14 * scale,
+      y:     cy + (R() - 0.5) * 8  * scale,
+      vx:    vx * scale,
+      vy:    vy * scale,
+      grav:  (grav || 0) * scale,
+      color: colors[ci % colors.length],
+      ps:    Math.round(ps * (sm || 1)),
+    });
+  }
+
+  switch (element) {
+    case 'Fire':
+      for (let i = 0; i < 22; i++)
+        addP((R()-0.5)*5.0, -(1.5+R()*4.5), 0.07, i%4, R()>0.6 ? 0.7 : 1.0);
+      break;
+    case 'Water':
+      for (let i = 0; i < 20; i++) {
+        const a  = R() * Math.PI * 2;
+        const sp = 2.0 + R() * 4.0;
+        addP(Math.cos(a)*sp, Math.sin(a)*sp * 0.6, 0.08, i%4, 0.9);
+      }
+      break;
+    case 'Earth':
+      for (let i = 0; i < 18; i++) {
+        const side = i%2 ? 1 : -1;
+        addP(side*(3.0+R()*4.5), -(0.8+R()*2.8), 0.14, i%4, 1.5);
+      }
+      break;
+    case 'Wind':
+      for (let i = 0; i < 18; i++) {
+        const side = i%2 ? 1 : -1;
+        addP(side*(5.0+R()*5.0), -(R()*1.5), -0.01, i%3, 0.7);
+      }
+      break;
+    case 'Ice':
+      for (let i = 0; i < 16; i++) {
+        const a  = (i/16) * Math.PI * 2;
+        const sp = 3.0 + R() * 2.5;
+        addP(Math.cos(a)*sp, Math.sin(a)*sp, 0.02, i%3, 1.0);
+      }
+      break;
+    case 'Light':
+      for (let i = 0; i < 16; i++) {
+        const a = (i/16) * Math.PI * 2;
+        addP(Math.cos(a)*8.0, Math.sin(a)*8.0 * 0.5, 0, i%3, 0.8);
+      }
+      break;
+    case 'Dark':
+      for (let i = 0; i < 20; i++) {
+        const a  = R() * Math.PI * 2;
+        const sp = 1.0 + R() * 2.5;
+        addP(Math.cos(a)*sp, Math.sin(a)*sp * 0.5 - 0.5, -0.02, i%4, 1.2);
+      }
+      break;
+    case 'Thunder':
+      for (let i = 0; i < 16; i++) {
+        const side = i%2 ? 1 : -1;
+        addP(side*(2.0+R()*3.5), -(0.8+R()*2.5), 0.05, i%4, 0.9);
+      }
+      break;
+    default:
+      for (let i = 0; i < 20; i++)
+        addP((R()-0.5)*5.0, -(1.5+R()*4.0), 0.06, i%4, 1.0);
+  }
+  return { list, element };
+}
+
+/** Step and draw particles at normalized time t (0..1). */
+function _drawParticles(ctx, effect, t) {
+  const STEPS = 32;
+  const steps = t * STEPS;
+  ctx.save();
+  for (const p of effect.list) {
+    const x = p.x + p.vx * steps;
+    const y = p.y + p.vy * steps + 0.5 * p.grav * steps * steps;
+    let alpha;
+    if (effect.element === 'Dark') {
+      alpha = Math.max(0, 1 - t) * (0.6 + 0.4 * Math.sin(t * Math.PI * 6));
+    } else if (effect.element === 'Light') {
+      alpha = Math.max(0, 1 - t * 2.2);
+    } else {
+      alpha = Math.max(0, 1 - t * 1.2);
+    }
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle   = p.color;
+    ctx.fillRect(Math.round(x - p.ps/2), Math.round(y - p.ps/2), p.ps, p.ps);
+  }
+  ctx.restore();
+}
+
+// ── Rendering ────────────────────────────────────────────────
+
+/**
+ * Draw one frame of a stencil-based elemental effect.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {string}  element
+ * @param {number}  cx, cy   glyph centre in canvas px
+ * @param {number}  bs       block size in px
+ * @param {number}  t        normalised time 0..1
+ */
+function _drawElemFrame(ctx, element, cx, cy, bs, t) {
+  if (element === 'Thunder') { _drawBolt(ctx, cx, cy, bs, t); return; }
+
+  // Envelope: pop-in 0→0.12, hold 0.12→0.55, float-fade 0.55→1.0
+  let scale, alpha;
+  if (t < 0.12) {
+    scale = 0.4 + 0.6 * (t / 0.12);
+    alpha = t / 0.12;
+  } else if (t < 0.55) {
+    scale = 1.0; alpha = 1.0;
+  } else {
+    scale = 1.0;
+    alpha = Math.max(0, 1 - (t - 0.55) / 0.45);
+  }
+  const floatY = t > 0.55 ? ((t - 0.55) / 0.45) * 28 : 0;
+  const eff_bs = bs * scale;
+
+  const stencil = ELEM_STENCILS[element];
+  const palette = ELEM_COLORS[element];
+  if (!stencil || !palette) return;
+
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.imageSmoothingEnabled = false;
+
+  for (const layer of stencil) {
+    ctx.fillStyle = palette[layer.ci];
+    const sz = Math.max(1, Math.round(eff_bs));
+    for (const [col, row] of layer.cells) {
+      ctx.fillRect(
+        Math.round(cx + col * eff_bs - eff_bs * 0.5),
+        Math.round(cy + row * eff_bs - eff_bs * 0.5 - floatY),
+        sz, sz
+      );
+    }
+  }
+  ctx.restore();
+}
+
+/** Animated pixel-art zigzag lightning bolt. */
+function _drawBolt(ctx, cx, cy, bs, t) {
+  const palette = ELEM_COLORS.Thunder;
+  const boltH   = _BOLT_ROWS.length * bs;
+  const originY = cy - boltH;
+
+  let alpha, mainColor;
+  if (t < 0.08) {
+    alpha = t / 0.08; mainColor = '#ffffff';
+  } else if (t < 0.5) {
+    alpha = 1.0;
+    mainColor = (t > 0.3 && Math.random() < 0.3) ? palette[1] : palette[0];
+  } else {
+    alpha = Math.max(0, 1 - (t - 0.5) / 0.5);
+    mainColor = palette[0];
+  }
+
+  ctx.save();
+
+  // Glow halo (colour[3], 1px bigger each side)
+  ctx.fillStyle   = palette[3];
+  ctx.globalAlpha = alpha * 0.55;
+  for (let i = 0; i < _BOLT_ROWS.length; i++) {
+    const [dc, dw] = _BOLT_ROWS[i];
+    ctx.fillRect(cx + dc * bs - 1, originY + i * bs, dw * bs + 2, bs + 1);
+  }
+  // Main bolt
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle   = mainColor;
+  for (let i = 0; i < _BOLT_ROWS.length; i++) {
+    const [dc, dw] = _BOLT_ROWS[i];
+    ctx.fillRect(cx + dc * bs, originY + i * bs, dw * bs, bs);
+  }
+  // White highlight (left edge of each row)
+  if (t < 0.5) {
+    ctx.fillStyle   = '#ffffff';
+    ctx.globalAlpha = alpha * 0.85;
+    for (let i = 0; i < _BOLT_ROWS.length; i++) {
+      const [dc] = _BOLT_ROWS[i];
+      ctx.fillRect(cx + dc * bs, originY + i * bs, Math.max(2, Math.round(bs * 0.4)), bs);
+    }
+  }
+  ctx.restore();
+}
+
+/**
+ * Overlay a pixel-art elemental hit effect on the arena canvas.
+ * @param {number}  player   defender index (0 or 1)
+ * @param {string}  element  one of the 8 element names
+ * @param {boolean} isCrit   larger / longer effect on crits
+ */
+function showElementEffect(player, element, isCrit) {
+  if (!element) return;
+  const arena = document.querySelector('.arena');
+  if (!arena) return;
+
+  // Offset outward from centre so effects land on the fighter sprite
+  // P1 (left):  visual ~240px,  P2 (right): visual ~390px
+  const cx      = player === 0 ? 240 : 390;
+  const partCy  = 195;  // hit zone — body of the fighter
+  const glyphCy = 113;  // symbol position
+  const bs      = isCrit ? 11 : 8;  // 50% bigger than before
+  const dur     = isCrit ? 950 : 680;
+
+  const ov = document.createElement('canvas');
+  ov.width  = 625;
+  ov.height = 280;
+  ov.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;z-index:5;image-rendering:pixelated;';
+  arena.appendChild(ov);
+
+  const ctx      = ov.getContext('2d');
+  ctx.imageSmoothingEnabled = false;
+  const particles = _spawnEffect(element, cx, partCy, isCrit);
+  const t0       = performance.now();
+
+  function tick(now) {
+    const t = Math.min(1, (now - t0) / dur);
+    ctx.clearRect(0, 0, 625, 280);
+    _drawParticles(ctx, particles, t);
+    _drawElemFrame(ctx, element, cx, glyphCy, bs, t);
+    if (t < 1) requestAnimationFrame(tick);
+    else        ov.remove();
+  }
+  requestAnimationFrame(tick);
+}
+
+// ============================================================
 //  Main fight function
 // ============================================================
 /**
@@ -1042,6 +1459,7 @@ async function fight(rounds, players) {
       const defPromise = wait(offset).then(function() {
         if (hit) {
           setHP(def, turn.defender_hp);
+          showElementEffect(def, players[atk].element, turn.crit);
           if (turn.crit) {
             showLabel(def, 'CRIT!  ' + turn.damage, '#fbbf24', true);
           } else {
