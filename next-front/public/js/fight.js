@@ -868,17 +868,19 @@ function _setFrame(player, animSet, frameName) {
   const canvas = _getEl(player);
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
+  ctx.imageSmoothingEnabled = false;   // nearest-neighbour — crisp pixel art at any scale
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   if (frameName === '__clear__') return;
   const url = animSet.baseUrl + frameName + '.png';
   const img = _imgCache[url];
   if (img && img.complete && img.naturalWidth) {
+    const SCALE = 1.5;
     if (img.naturalWidth === DOUBLE_WIDE) {
       // Double-wide frame: composite BG layer (right half) then OBJ layer (left half)
-      const dw = Math.floor(HALF_W * 1.2);
-      const dh = Math.floor(img.naturalHeight * 1.2);
+      const dw = Math.floor(HALF_W * SCALE);
+      const dh = Math.floor(img.naturalHeight * SCALE);
       const x  = Math.floor((canvas.width - dw) / 2);
-      const y  = canvas.height - dh;
+      const y  = canvas.height - dh + 20;
       const objLayer = _chromaKeySlice(img, url + '#obj', 0,      HALF_W);
       const bgLayer  = _chromaKeySlice(img, url + '#bg',  HALF_W, HALF_W);
       ctx.drawImage(bgLayer,  x, y, dw, dh);
@@ -886,9 +888,9 @@ function _setFrame(player, animSet, frameName) {
     } else {
       const off = _chromaKey(img);
       // center horizontally, bottom-align
-      const x = Math.floor((canvas.width  - off.width  * 1.2) / 2);
-      const y = canvas.height - off.height * 1.2;
-      ctx.drawImage(off, x, y, off.width * 1.2, off.height * 1.2);
+      const x = Math.floor((canvas.width  - off.width  * SCALE) / 2);
+      const y = canvas.height - off.height * SCALE + 20;
+      ctx.drawImage(off, x, y, off.width * SCALE, off.height * SCALE);
     }
   }
 }
@@ -1016,19 +1018,25 @@ const ELEM_STENCILS = {
   ],
 
   // 🌊 Water wave — base trough + two crests + centre jet
+  // 💧 Water droplet — round body tapering to a point at top
   Water: [
-    { ci:0, cells: [                                    // trough base
-      [-5,1],[-4,1],[-3,1],[-2,1],[-1,1],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],
-      // left crest
-      [-4,0],[-3,0],[-3,-1],[-4,-1],[-3,-2],
-      // right crest
-      [3,0],[4,0],[3,-1],[4,-1],[3,-2],
-      // centre upward jet
-      [-1,0],[0,0],[1,0],[-1,-1],[0,-1],[1,-1],[0,-2],[0,-3],
+    { ci:0, cells: [                                    // dark outer body
+      [0,-4],
+      [-1,-3],[0,-3],[1,-3],
+      [-2,-2],[-1,-2],[0,-2],[1,-2],[2,-2],
+      [-2,-1],[-1,-1],[0,-1],[1,-1],[2,-1],
+      [-2,0], [-1,0], [0,0], [1,0], [2,0],
+      [-2,1], [-1,1], [0,1], [1,1], [2,1],
+      [-1,2], [0,2], [1,2],
     ]},
-    { ci:1, cells: [ [-3,-1],[3,-1], [-3,-2],[3,-2], [0,-2],[0,-3] ] },
-    { ci:2, cells: [ [-3,-2],[3,-2],[0,-3] ] },
-    { ci:3, cells: [ [0,-3] ] },
+    { ci:1, cells: [                                    // mid-blue inner
+      [-1,-2],[0,-2],[1,-2],
+      [-1,-1],[0,-1],[1,-1],
+      [-1,0], [0,0], [1,0],
+      [0,1],  [1,1],
+    ]},
+    { ci:2, cells: [ [-1,-3],[-1,-2],[-1,-1] ] },      // left-side highlight shimmer
+    { ci:3, cells: [ [0,-4] ] },                        // bright tip
   ],
 
   // ⛰ Two mountains — tall left peak, shorter right peak, rocky base
@@ -1112,27 +1120,30 @@ const ELEM_STENCILS = {
     { ci:3, cells: [ [0,-4],[-2,-2],[-2,1],[0,3] ] },  // highlight points
   ],
 
-  // 💨 Wind — three flowing S-curve arcs
+  // 🌪 Wind tornado — wide funnel top tapering to a point at bottom
   Wind: [
-    { ci:0, cells: [                                    // three arcs
-      // top arc curves right then up
-      [-4,-3],[-3,-3],[-2,-3],[-1,-3],[0,-3],[1,-3],[2,-3],[3,-3],
-      [3,-2],[4,-2],[4,-1],
-      // middle arc (wider, offset)
-      [-5,0],[-4,0],[-3,0],[-2,0],[-1,0],[0,0],[1,0],[2,0],[3,0],
-      [3,1],[4,1],[4,2],
-      // bottom arc
-      [-4,3],[-3,3],[-2,3],[-1,3],[0,3],[1,3],[2,3],[3,3],
+    { ci:0, cells: [                                    // outer funnel body
+      [-4,-4],[-3,-4],[-2,-4],[-1,-4],[0,-4],[1,-4],[2,-4],[3,-4],[4,-4],
+      [-3,-3],[-2,-3],[-1,-3],[0,-3],[1,-3],[2,-3],[3,-3],
+      [-2,-2],[-1,-2],[0,-2],[1,-2],[2,-2],
+      [-2,-1],[-1,-1],[0,-1],[1,-1],[2,-1],
+      [-1,0], [0,0], [1,0],
+      [-1,1], [0,1], [1,1],
+      [0,2], [0,3], [0,4],
     ]},
-    { ci:1, cells: [                                    // mid highlight
-      [-2,-3],[-1,-3],[0,-3],[3,-1],[4,-1],
-      [-3,0],[-2,0],[3,2],[4,2],
-      [-2,3],[-1,3],[0,3],
+    { ci:1, cells: [                                    // inner swirl shading
+      [-2,-4],[-1,-4],[0,-4],[1,-4],[2,-4],
+      [-1,-3],[0,-3],[1,-3],
+      [0,-2],[1,-2],
+      [-1,-1],[0,-1],
     ]},
-    { ci:2, cells: [                                    // bright leading edges
-      [-4,-3],[3,-2],[-5,0],[3,1],[-4,3],[3,3],
+    { ci:2, cells: [                                    // bright swirl lines
+      [-3,-3],[3,-3],
+      [-2,-2],[2,-2],
+      [-1,0],[1,0],
+      [0,2],[0,3],
     ]},
-    { ci:3, cells: [] },
+    { ci:3, cells: [ [0,4] ] },                         // funnel tip
   ],
 
   // ⚡ Thunder — handled separately via _drawBolt()
@@ -1156,7 +1167,7 @@ const _BOLT_ROWS = [
 function _spawnEffect(element, cx, cy, isCrit) {
   const scale  = isCrit ? 1.5 : 1.0;
   const colors = ELEM_COLORS[element] || ELEM_COLORS.Fire;
-  const ps     = Math.round(9 * scale);   // bigger than before (was 5)
+  const ps     = Math.round(14 * scale);  // large so particles are clearly visible
   const R      = Math.random.bind(Math);
   const list   = [];
 
@@ -1174,64 +1185,64 @@ function _spawnEffect(element, cx, cy, isCrit) {
 
   switch (element) {
     case 'Fire':
-      for (let i = 0; i < 22; i++)
-        addP((R()-0.5)*5.0, -(1.5+R()*4.5), 0.07, i%4, R()>0.6 ? 0.7 : 1.0);
+      for (let i = 0; i < 28; i++)
+        addP((R()-0.5)*4.0, -(1.2+R()*3.5), 0.07, i%4, R()>0.6 ? 0.7 : 1.0);
       break;
     case 'Water':
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 26; i++) {
         const a  = R() * Math.PI * 2;
-        const sp = 2.0 + R() * 4.0;
+        const sp = 1.5 + R() * 3.0;
         addP(Math.cos(a)*sp, Math.sin(a)*sp * 0.6, 0.08, i%4, 0.9);
       }
       break;
     case 'Earth':
-      for (let i = 0; i < 18; i++) {
+      for (let i = 0; i < 24; i++) {
         const side = i%2 ? 1 : -1;
-        addP(side*(3.0+R()*4.5), -(0.8+R()*2.8), 0.14, i%4, 1.5);
+        addP(side*(2.5+R()*3.5), -(0.6+R()*2.2), 0.14, i%4, 1.5);
       }
       break;
     case 'Wind':
-      for (let i = 0; i < 18; i++) {
+      for (let i = 0; i < 24; i++) {
         const side = i%2 ? 1 : -1;
-        addP(side*(5.0+R()*5.0), -(R()*1.5), -0.01, i%3, 0.7);
+        addP(side*(3.5+R()*4.0), -(R()*1.2), -0.01, i%3, 0.7);
       }
       break;
     case 'Ice':
-      for (let i = 0; i < 16; i++) {
-        const a  = (i/16) * Math.PI * 2;
-        const sp = 3.0 + R() * 2.5;
+      for (let i = 0; i < 22; i++) {
+        const a  = (i/22) * Math.PI * 2;
+        const sp = 2.5 + R() * 2.0;
         addP(Math.cos(a)*sp, Math.sin(a)*sp, 0.02, i%3, 1.0);
       }
       break;
     case 'Light':
-      for (let i = 0; i < 16; i++) {
-        const a = (i/16) * Math.PI * 2;
-        addP(Math.cos(a)*8.0, Math.sin(a)*8.0 * 0.5, 0, i%3, 0.8);
+      for (let i = 0; i < 22; i++) {
+        const a = (i/22) * Math.PI * 2;
+        addP(Math.cos(a)*6.0, Math.sin(a)*6.0 * 0.5, 0, i%3, 0.8);
       }
       break;
     case 'Dark':
-      for (let i = 0; i < 20; i++) {
+      for (let i = 0; i < 26; i++) {
         const a  = R() * Math.PI * 2;
-        const sp = 1.0 + R() * 2.5;
-        addP(Math.cos(a)*sp, Math.sin(a)*sp * 0.5 - 0.5, -0.02, i%4, 1.2);
+        const sp = 0.8 + R() * 2.0;
+        addP(Math.cos(a)*sp, Math.sin(a)*sp * 0.5 - 0.4, -0.02, i%4, 1.2);
       }
       break;
     case 'Thunder':
-      for (let i = 0; i < 16; i++) {
+      for (let i = 0; i < 22; i++) {
         const side = i%2 ? 1 : -1;
-        addP(side*(2.0+R()*3.5), -(0.8+R()*2.5), 0.05, i%4, 0.9);
+        addP(side*(1.5+R()*3.0), -(0.6+R()*2.0), 0.05, i%4, 0.9);
       }
       break;
     default:
-      for (let i = 0; i < 20; i++)
-        addP((R()-0.5)*5.0, -(1.5+R()*4.0), 0.06, i%4, 1.0);
+      for (let i = 0; i < 26; i++)
+        addP((R()-0.5)*4.0, -(1.2+R()*3.2), 0.06, i%4, 1.0);
   }
   return { list, element };
 }
 
 /** Step and draw particles at normalized time t (0..1). */
 function _drawParticles(ctx, effect, t) {
-  const STEPS = 32;
+  const STEPS = 20;  // lower = slower travel = easier to see
   const steps = t * STEPS;
   ctx.save();
   for (const p of effect.list) {
@@ -1357,9 +1368,9 @@ function showElementEffect(player, element, isCrit) {
   const arena = document.querySelector('.arena');
   if (!arena) return;
 
-  // Offset outward from centre so effects land on the fighter sprite
-  // P1 (left):  visual ~240px,  P2 (right): visual ~390px
-  const cx      = player === 0 ? 240 : 390;
+  // Particles: halfway between centre (293/333) and outer offset (240/390)
+  // P1: 254, P2: 376
+  const cx      = player === 0 ? 254 : 376;
   const partCy  = 195;  // hit zone — body of the fighter
   const glyphCy = 113;  // symbol position
   const bs      = isCrit ? 11 : 8;  // 50% bigger than before
